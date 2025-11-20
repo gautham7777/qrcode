@@ -21,7 +21,7 @@
             width: 1px; height: 1px; background: transparent;
             box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 300px 400px #FFF;
             animation: animStar 100s linear infinite;
-            position: absolute; top: 0; left: 0; z-index: -1;
+            position: absolute; top: 0; left: 0; z-index: -2;
         }
         .stars:after {
             content: " "; position: absolute; top: 2000px; width: 1px; height: 1px;
@@ -29,6 +29,46 @@
             box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 300px 400px #FFF;
         }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
+        
+        /* --- Shooting Stars --- */
+        .shooting-star {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1), 0 0 0 8px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 1);
+            animation: animate 3s linear infinite;
+            opacity: 0;
+            z-index: -1;
+        }
+        .shooting-star::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 300px;
+            height: 1px;
+            background: linear-gradient(90deg, #fff, transparent);
+        }
+        @keyframes animate {
+            0% { transform: rotate(315deg) translateX(0); opacity: 1; }
+            70% { opacity: 1; }
+            100% { transform: rotate(315deg) translateX(-1000px); opacity: 0; }
+        }
+        .shooting-star:nth-child(1) { top: 0; right: 0; left: initial; animation-delay: 0s; animation-duration: 1s; }
+        .shooting-star:nth-child(2) { top: 0; right: 80px; left: initial; animation-delay: 0.2s; animation-duration: 3s; }
+        .shooting-star:nth-child(3) { top: 80px; right: 0; left: initial; animation-delay: 0.4s; animation-duration: 2s; }
+        .shooting-star:nth-child(4) { top: 0; right: 180px; left: initial; animation-delay: 0.6s; animation-duration: 1.5s; }
+        .shooting-star:nth-child(5) { top: 0; right: 400px; left: initial; animation-delay: 0.8s; animation-duration: 2.5s; }
+        .shooting-star:nth-child(6) { top: 0; right: 600px; left: initial; animation-delay: 1s; animation-duration: 3s; }
+        .shooting-star:nth-child(7) { top: 300px; right: 0; left: initial; animation-delay: 1.2s; animation-duration: 1.75s; }
+        .shooting-star:nth-child(8) { top: 0; right: 700px; left: initial; animation-delay: 1.4s; animation-duration: 1.25s; }
+        .shooting-star:nth-child(9) { top: 0; right: 1000px; left: initial; animation-delay: 0.75s; animation-duration: 2.25s; }
+        .shooting-star:nth-child(10) { top: 0; right: 450px; left: initial; animation-delay: 2.75s; animation-duration: 2.25s; }
+
 
         /* --- The Interface Card --- */
         #interface {
@@ -59,6 +99,28 @@
             width: 100%; box-sizing: border-box;
         }
         .btn:hover { background: #00ff88; color: black; box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
+        
+        /* --- Small Bottom-Right Fullscreen Button --- */
+        #small-fs-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.2s;
+            padding: 0;
+        }
+        #small-fs-btn:hover { background: #00ff88; color: black; box-shadow: 0 0 15px rgba(0, 255, 136, 0.6); }
+
 
         input[type="file"] { display: none; }
 
@@ -66,14 +128,43 @@
         #qr-phase { display: none; animation: fadeIn 0.5s; }
         
         #qrcode-container {
-            background: white; padding: 15px; display: inline-block;
-            border: 2px solid #00ff88; margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            display: inline-block;
+            border: 3px solid #00ff88;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
         }
         
         .status-line { font-size: 14px; color: #aaa; margin-bottom: 20px; }
         
         .blink { animation: blinker 2s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
+        @keyframes blinker { 50% { opacity: 0.3; } }
+        
+        /* --- Pre-Launch Animation --- */
+        #launch-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 90; display: none;
+            justify-content: center; align-items: center;
+            flex-direction: column;
+        }
+        
+        .countdown-text {
+            font-size: 10em; color: #00ff88;
+            text-shadow: 0 0 50px #00ff88;
+        }
+        
+        .launch-flash {
+            animation: flashAnim 0.5s ease-out forwards;
+        }
+        
+        @keyframes flashAnim {
+            0% { background: black; }
+            50% { background: white; }
+            100% { background: black; }
+        }
+
 
         /* --- Media --- */
         video, img { 
@@ -87,6 +178,16 @@
 <body>
 
     <div class="stars"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
 
     <div id="interface">
         <div id="upload-phase">
@@ -103,8 +204,14 @@
             </div>
             <p id="connection-status" class="status-line blink">WAITING FOR REMOTE TERMINAL...</p>
             
-            <button id="arm-btn" class="btn" onclick="armSystem()">Initialize Fullscreen</button>
+            <button id="arm-btn" class="btn" onclick="armSystem()">Initialize Display</button>
         </div>
+    </div>
+    
+    <button id="small-fs-btn" class="btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
+
+    <div id="launch-overlay">
+        <div id="countdown" class="countdown-text">Let's Go!</div>
     </div>
 
     <video id="mainVideo" playsinline></video>
@@ -127,11 +234,11 @@
             // Make the Arm button pulse to show it's the next step
             const btn = document.getElementById('arm-btn');
             btn.style.boxShadow = "0 0 20px #00ff88";
-            btn.innerText = "[ INITIALIZE DISPLAY ]";
+            btn.innerText = "[ GO TO LAUNCH MODE ]";
 
             conn.on('data', (data) => {
                 if (data === 'PLAY') {
-                    launchMedia();
+                    startLaunchSequence();
                 }
             });
         });
@@ -162,25 +269,67 @@
         }
 
         function armSystem() {
-            // 1. Go Fullscreen
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) elem.requestFullscreen().catch(err => {});
-            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            toggleFullscreen();
             
-            // 2. Fade out Interface (Screen goes black)
+            // Fade out Interface (Screen goes black)
             const ui = document.getElementById('interface');
             ui.style.opacity = '0';
-            setTimeout(() => { ui.style.display = 'none'; }, 500);
+            // Hide the small fullscreen button too
+            document.getElementById('small-fs-btn').style.opacity = '0';
             
-            // 3. Hide Cursor
+            setTimeout(() => { 
+                ui.style.display = 'none'; 
+                document.getElementById('small-fs-btn').style.display = 'none';
+            }, 500);
+            
+            // Hide Cursor
             document.body.style.cursor = 'none';
+        }
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function startLaunchSequence() {
+            // Ensure UI is gone
+            document.getElementById('interface').style.display = 'none';
+            document.getElementById('small-fs-btn').style.display = 'none';
+            document.body.style.cursor = 'none';
+            
+            const overlay = document.getElementById('launch-overlay');
+            const countdown = document.getElementById('countdown');
+            
+            overlay.style.display = 'flex';
+            
+            // Simple "3, 2, 1" countdown animation
+            let count = 3;
+            countdown.innerText = count;
+            
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdown.innerText = count;
+                } else if (count === 0) {
+                    countdown.innerText = "LAUNCH";
+                } else {
+                    clearInterval(timer);
+                    overlay.classList.add('launch-flash');
+                    // Wait for flash to finish before showing media
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                        launchMedia();
+                    }, 500);
+                }
+            }, 800); // slightly faster than a second for more energy
         }
 
         function launchMedia() {
-            // In case they didn't click arm, ensure UI is gone
-            document.getElementById('interface').style.display = 'none';
-            document.body.style.cursor = 'none';
-
             if (mediaType === 'video') {
                 const vid = document.getElementById('mainVideo');
                 vid.style.display = 'block';
