@@ -98,7 +98,10 @@
         .countdown-text { font-size: 10em; color: #00ff88; text-shadow: 0 0 50px #00ff88; text-align: center;}
         .sub-text { font-size: 2rem; color: white; letter-spacing: 10px; margin-top: 20px; opacity: 0.7; }
         
+        /* Speed up flash for restart */
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
+        .quick-cycle { animation: flashAnim 0.3s ease-out forwards; }
+
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
 
         /* --- Media --- */
@@ -171,36 +174,33 @@
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
                 
-                // --- MAGIC LOOP LOGIC ---
+                // --- SUBTLE LOOP LOGIC ---
                 vid.onended = function() {
-                    // 1. Hide video instantly
+                    // 1. Power Off (Video turns off, screen goes black)
                     vid.style.display = 'none';
                     
-                    // 2. Show Overlay
+                    // Use overlay for flash, but hide text
                     const overlay = document.getElementById('launch-overlay');
-                    const countText = document.getElementById('countdown');
-                    const sub = document.getElementById('subtext');
+                    document.getElementById('countdown').innerText = "";
+                    document.getElementById('subtext').innerText = "";
                     
                     overlay.style.display = 'flex';
-                    overlay.classList.remove('launch-flash'); // Clear previous flash
-                    
-                    countText.style.fontSize = "4em";
-                    countText.innerText = "SEQUENCE COMPLETE";
-                    sub.innerText = "RE-ENGAGING LOOP...";
-                    
-                    // 3. Wait 3 seconds, then restart
+                    overlay.classList.remove('launch-flash');
+                    overlay.classList.remove('quick-cycle');
+
+                    // Force reflow for animation restart
+                    void overlay.offsetWidth; 
+
+                    // 2. Quick Power Cycle Flash
+                    overlay.classList.add('quick-cycle');
+
+                    // 3. Power On (Restart video quickly)
                     setTimeout(() => {
-                         countText.innerText = "RESTARTING";
-                         setTimeout(() => {
-                             overlay.classList.add('launch-flash'); // Flash again
-                             setTimeout(() => {
-                                 overlay.style.display = 'none';
-                                 vid.style.display = 'block';
-                                 vid.currentTime = 0;
-                                 vid.play();
-                             }, 500);
-                         }, 1000);
-                    }, 2000);
+                         overlay.style.display = 'none';
+                         vid.style.display = 'block';
+                         vid.currentTime = 0;
+                         vid.play();
+                    }, 300); // Wait for quick flash to finish
                 };
 
             } else if (file.type.startsWith('image')) {
@@ -243,6 +243,7 @@
             const countdown = document.getElementById('countdown');
             const sub = document.getElementById('subtext');
             
+            overlay.classList.remove('quick-cycle'); // Ensure clean state
             overlay.style.display = 'flex';
             count = 3;
             countdown.style.fontSize = "10em";
