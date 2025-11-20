@@ -2,51 +2,167 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mission Control</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        body { background-color: #111; color: white; font-family: sans-serif; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #status { margin-bottom: 20px; color: #888; }
-        button { width: 250px; height: 250px; border-radius: 50%; border: none; font-size: 24px; font-weight: bold; color: white; background: #e63946; box-shadow: 0 0 20px rgba(230, 57, 70, 0.5); cursor: pointer; transition: transform 0.1s; }
-        button:active { transform: scale(0.95); background: #d62828; }
-        button:disabled { background: #444; cursor: not-allowed; box-shadow: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        body { 
+            background-color: #050510; 
+            color: #00ff88; 
+            font-family: 'Share Tech Mono', monospace; 
+            height: 100vh; margin: 0; 
+            display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Moving Stars Background --- */
+        .stars {
+            width: 1px; height: 1px;
+            background: transparent;
+            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 300px 400px #FFF, 200px 200px #FFF, 400px 300px #FFF;
+            animation: animStar 50s linear infinite;
+            position: absolute; top: 0; left: 0; z-index: -1;
+        }
+        .stars:after {
+            content: " "; position: absolute; top: 2000px; width: 1px; height: 1px;
+            background: transparent;
+            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 300px 400px #FFF, 200px 200px #FFF, 400px 300px #FFF;
+        }
+        @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
+
+        /* --- UI Elements --- */
+        #header {
+            position: absolute; top: 30px; 
+            text-align: center; width: 100%;
+            letter-spacing: 2px; text-transform: uppercase;
+            font-size: 14px; color: rgba(0, 255, 136, 0.6);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            padding-bottom: 10px;
+        }
+
+        #status { 
+            margin-bottom: 50px; color: #ff3333; 
+            font-size: 18px; letter-spacing: 1px; 
+            text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        /* --- The Launch Button --- */
+        #btn-container {
+            position: relative;
+            width: 280px; height: 280px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* Spinning Rings */
+        .ring {
+            position: absolute; border-radius: 50%; border: 1px dashed rgba(0, 255, 136, 0.3);
+            width: 100%; height: 100%;
+            animation: spin 10s linear infinite;
+        }
+        .ring:nth-child(2) { width: 110%; height: 110%; border: 1px solid rgba(255, 255, 255, 0.1); animation-direction: reverse; animation-duration: 15s; }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        button { 
+            width: 220px; height: 220px; 
+            border-radius: 50%; border: 4px solid rgba(255,255,255,0.2); 
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 32px; font-weight: bold; color: white; 
+            
+            /* Deep Space Red Gradient */
+            background: radial-gradient(circle at 30% 30%, #ff4d4d, #990000);
+            box-shadow: 
+                0 0 30px rgba(255, 0, 0, 0.6), 
+                inset 0 0 20px rgba(0,0,0,0.5);
+            
+            cursor: pointer; text-transform: uppercase;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        button:active { 
+            transform: scale(0.94); 
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            background: radial-gradient(circle at 30% 30%, #cc0000, #660000);
+        }
+        
+        button:disabled { 
+            background: #1a1a1a; color: #444; 
+            box-shadow: none; border-color: #333; cursor: not-allowed; 
+        }
+
+        .success-state {
+            background: radial-gradient(circle at 30% 30%, #00ff88, #006633) !important;
+            box-shadow: 0 0 50px #00ff88 !important;
+            border-color: #fff !important;
+            color: black !important;
+        }
+
     </style>
 </head>
 <body>
 
-    <p id="status">Connecting...</p>
-    <button id="btn" onclick="trigger()" disabled>START<br>CEREMONY</button>
+    <div class="stars"></div>
+    
+    <div id="header">
+        🚀 Mission Control /// Sequence 01
+    </div>
+
+    <div id="status">SEARCHING FOR ORBIT...</div>
+
+    <div id="btn-container">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <button id="btn" onclick="trigger()" disabled>
+            LAUNCH
+        </button>
+    </div>
 
     <script>
         const peer = new Peer();
         let conn;
-
-        // Get the Host ID from the URL (?id=...)
-        const urlParams = new URLSearchParams(window.location.search);
-        const hostId = urlParams.get('id');
+        const hostId = new URLSearchParams(window.location.search).get('id');
 
         peer.on('open', () => {
-            if (!hostId) {
-                document.getElementById('status').innerText = "Error: No Host ID found.";
-                return;
-            }
-
-            // Connect to the Host
+            if (!hostId) return document.getElementById('status').innerText = "ERROR: NO TARGET";
+            
             conn = peer.connect(hostId);
-
             conn.on('open', () => {
-                document.getElementById('status').innerText = "Connected & Ready";
-                document.getElementById('status').style.color = "#4cc9f0";
-                document.getElementById('btn').disabled = false;
+                // Status Update
+                const statusEl = document.getElementById('status');
+                statusEl.innerText = "/// SYSTEM ARMED ///";
+                statusEl.style.color = "#00ff88";
+                statusEl.style.textShadow = "0 0 10px #00ff88";
+                statusEl.style.animation = "none"; // Stop blinking
+                
+                // Button Enable
+                const btn = document.getElementById('btn');
+                btn.disabled = false;
+                
+                // Haptic Feedback
+                if(navigator.vibrate) navigator.vibrate(100);
             });
         });
 
         function trigger() {
             if (conn) {
                 conn.send('PLAY');
-                document.getElementById('btn').innerText = "PLAYING!";
-                document.getElementById('btn').style.background = "#2a9d8f";
+                
+                const btn = document.getElementById('btn');
+                btn.innerText = "LIFTOFF";
+                btn.classList.add('success-state');
+                
+                document.getElementById('status').innerText = "SEQUENCE INITIATED";
+                
+                // Long vibration for launch
+                if(navigator.vibrate) navigator.vibrate([100, 50, 500]);
             }
         }
     </script>
