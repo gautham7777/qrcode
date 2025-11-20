@@ -11,16 +11,13 @@
         body { background-color: #050510; color: #00ff88; font-family: 'Share Tech Mono', monospace; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
         .stars { width: 1px; height: 1px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF; animation: animStar 50s linear infinite; position: absolute; top: 0; left: 0; z-index: -1; }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-        
         #header { position: absolute; top: 30px; text-align: center; width: 100%; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; color: rgba(0, 255, 136, 0.6); border-bottom: 1px solid rgba(0, 255, 136, 0.2); padding-bottom: 10px; }
         #status { margin-bottom: 50px; color: #ff3333; font-size: 18px; letter-spacing: 1px; text-shadow: 0 0 5px rgba(255, 51, 51, 0.5); animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.5; } }
-        
         #btn-container { position: relative; width: 280px; height: 280px; display: flex; justify-content: center; align-items: center; }
         .ring { position: absolute; border-radius: 50%; border: 1px dashed rgba(0, 255, 136, 0.3); width: 100%; height: 100%; animation: spin 10s linear infinite; }
         .ring:nth-child(2) { width: 110%; height: 110%; border: 1px solid rgba(255, 255, 255, 0.1); animation-direction: reverse; animation-duration: 15s; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        
         button { width: 220px; height: 220px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.2); font-family: 'Share Tech Mono', monospace; font-size: 32px; font-weight: bold; color: white; background: radial-gradient(circle at 30% 30%, #ff4d4d, #990000); box-shadow: 0 0 30px rgba(255, 0, 0, 0.6); cursor: pointer; text-transform: uppercase; z-index: 10; transition: all 0.2s; }
         button:active { transform: scale(0.94); }
         button:disabled { background: #1a1a1a; color: #444; box-shadow: none; border-color: #333; cursor: not-allowed; }
@@ -40,10 +37,10 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // SAME CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyAbcNbPBSnxztpnqG1jCcynCShjxukqjhs",
             authDomain: "billy-app-efa3f.firebaseapp.com",
+            databaseURL: "https://billy-app-efa3f-default-rtdb.firebaseio.com",
             projectId: "billy-app-efa3f",
             storageBucket: "billy-app-efa3f.firebasestorage.app",
             messagingSenderId: "311034808403",
@@ -54,30 +51,25 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Get ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('id');
 
         if (!sessionId) {
             document.getElementById('status').innerText = "ERROR: SCAN QR AGAIN";
         } else {
-            // Tell host we are here
             set(ref(db, 'sessions/' + sessionId), 'CONNECTED').then(() => {
                 const statusEl = document.getElementById('status');
                 statusEl.innerText = "/// SYSTEM ARMED ///";
                 statusEl.style.color = "#00ff88";
                 statusEl.style.textShadow = "0 0 10px #00ff88";
                 statusEl.style.animation = "none";
-                
-                const btn = document.getElementById('btn');
-                btn.disabled = false;
+                document.getElementById('btn').disabled = false;
                 if(navigator.vibrate) navigator.vibrate(100);
             });
         }
 
         window.trigger = () => {
             set(ref(db, 'sessions/' + sessionId), 'PLAY');
-            
             const btn = document.getElementById('btn');
             btn.innerText = "LIFTOFF";
             btn.classList.add('success-state');
