@@ -98,7 +98,6 @@
         .countdown-text { font-size: 10em; color: #00ff88; text-shadow: 0 0 50px #00ff88; text-align: center;}
         .sub-text { font-size: 2rem; color: white; letter-spacing: 10px; margin-top: 20px; opacity: 0.7; }
         
-        /* Speed up flash for restart */
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         .quick-cycle { animation: flashAnim 0.3s ease-out forwards; }
 
@@ -146,6 +145,67 @@
         const peer = new Peer(); 
         let myId = "";
         let mediaType = "";
+        let audioCtx; // The Sound System
+
+        // --- SOUND ENGINE ---
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playBeep() {
+            if (!audioCtx) initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // High pitch A5
+            osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.1);
+            
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function playLaunchSound() {
+            if (!audioCtx) initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            // Rising "Warp" Tone
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 1);
+            
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.5);
+        }
+
+        function playGlitchSound() {
+            if (!audioCtx) initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(50, audioCtx.currentTime);
+            
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+        // -------------------
 
         peer.on('open', (id) => { myId = id; });
 
@@ -164,6 +224,7 @@
         });
 
         function handleFile(input) {
+            initAudio(); // Wake up audio engine on user click
             const file = input.files[0];
             if (!file) return;
             
@@ -174,12 +235,9 @@
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
                 
-                // --- SUBTLE LOOP LOGIC ---
+                // --- LOOP LOGIC ---
                 vid.onended = function() {
-                    // 1. Power Off (Video turns off, screen goes black)
                     vid.style.display = 'none';
-                    
-                    // Use overlay for flash, but hide text
                     const overlay = document.getElementById('launch-overlay');
                     document.getElementById('countdown').innerText = "";
                     document.getElementById('subtext').innerText = "";
@@ -187,20 +245,17 @@
                     overlay.style.display = 'flex';
                     overlay.classList.remove('launch-flash');
                     overlay.classList.remove('quick-cycle');
-
-                    // Force reflow for animation restart
                     void overlay.offsetWidth; 
-
-                    // 2. Quick Power Cycle Flash
                     overlay.classList.add('quick-cycle');
 
-                    // 3. Power On (Restart video quickly)
+                    playGlitchSound(); // Sound Effect
+
                     setTimeout(() => {
                          overlay.style.display = 'none';
                          vid.style.display = 'block';
                          vid.currentTime = 0;
                          vid.play();
-                    }, 300); // Wait for quick flash to finish
+                    }, 300);
                 };
 
             } else if (file.type.startsWith('image')) {
@@ -218,6 +273,7 @@
         }
 
         function armSystem() {
+            initAudio(); // Ensure audio context is running
             toggleFullscreen();
             const ui = document.getElementById('interface');
             ui.style.opacity = '0';
@@ -243,17 +299,25 @@
             const countdown = document.getElementById('countdown');
             const sub = document.getElementById('subtext');
             
-            overlay.classList.remove('quick-cycle'); // Ensure clean state
+            overlay.classList.remove('quick-cycle');
             overlay.style.display = 'flex';
             count = 3;
+            
             countdown.style.fontSize = "10em";
             countdown.innerText = count;
             sub.innerText = "INITIATING LAUNCH";
-            
+            playBeep(); // Sound
+
             const timer = setInterval(() => {
                 count--;
-                if (count > 0) countdown.innerText = count;
-                else if (count === 0) countdown.innerText = "LAUNCH";
+                if (count > 0) {
+                    countdown.innerText = count;
+                    playBeep(); // Sound
+                }
+                else if (count === 0) {
+                    countdown.innerText = "LAUNCH";
+                    playLaunchSound(); // Big Sound
+                }
                 else {
                     clearInterval(timer);
                     overlay.classList.add('launch-flash');
