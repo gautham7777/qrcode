@@ -5,291 +5,167 @@
     <title>Mission Control Host</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        window.firebase = { initializeApp, getDatabase, ref, onValue, set };
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-        body { 
-            background-color: #050510; color: #00ff88; 
-            font-family: 'Share Tech Mono', monospace; 
-            height: 100vh; margin: 0; 
-            display: flex; justify-content: center; align-items: center; 
-            overflow: hidden;
-        }
-
-        /* --- Star Field Background --- */
-        .stars {
-            width: 1px; height: 1px; background: transparent;
-            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 300px 400px #FFF;
-            animation: animStar 100s linear infinite;
-            position: absolute; top: 0; left: 0; z-index: -2;
-        }
-        .stars:after {
-            content: " "; position: absolute; top: 2000px; width: 1px; height: 1px;
-            background: transparent;
-            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 300px 400px #FFF;
-        }
+        body { background-color: #050510; color: #00ff88; font-family: 'Share Tech Mono', monospace; height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .stars { width: 1px; height: 1px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; animation: animStar 100s linear infinite; position: absolute; top: 0; left: 0; z-index: -2; }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
         
-        /* --- The Interface Card --- */
-        #interface {
-            background: rgba(0, 20, 10, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            box-shadow: 0 0 50px rgba(0, 255, 136, 0.1);
-            padding: 60px;
-            border-radius: 12px;
-            text-align: center;
-            max-width: 500px; width: 90%;
-            z-index: 10;
-            transition: opacity 0.5s ease;
-        }
-
-        h1 { 
-            margin: 0 0 40px 0; font-size: 24px; letter-spacing: 4px; 
-            text-transform: uppercase; color: white; text-shadow: 0 0 10px rgba(0,255,136,0.5); 
-            border-bottom: 1px solid rgba(0,255,136,0.2); padding-bottom: 20px;
-        }
-
-        /* --- Buttons --- */
-        .btn { 
-            padding: 20px 40px; font-family: 'Share Tech Mono', monospace;
-            font-size: 20px; color: #00ff88; background: rgba(0, 255, 136, 0.1);
-            border: 1px solid #00ff88; cursor: pointer; 
-            transition: all 0.2s; text-transform: uppercase; letter-spacing: 2px;
-            width: 100%; box-sizing: border-box;
-        }
+        #interface { background: rgba(0, 20, 10, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0, 255, 136, 0.3); padding: 60px; border-radius: 12px; text-align: center; z-index: 10; transition: opacity 0.5s; }
+        h1 { margin: 0 0 40px 0; font-size: 24px; letter-spacing: 4px; text-transform: uppercase; color: white; border-bottom: 1px solid rgba(0,255,136,0.2); padding-bottom: 20px; }
+        .btn { padding: 20px 40px; font-family: 'Share Tech Mono', monospace; font-size: 20px; color: #00ff88; background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; cursor: pointer; text-transform: uppercase; width: 100%; }
         .btn:hover { background: #00ff88; color: black; box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
         
-        /* --- Small Bottom-Right Fullscreen Button --- */
-        #small-fs-btn {
-            position: fixed; bottom: 20px; right: 20px;
-            width: 40px; height: 40px;
-            background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88;
-            color: #00ff88; font-size: 20px;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 100; transition: all 0.2s; padding: 0;
-        }
-        #small-fs-btn:hover { background: #00ff88; color: black; box-shadow: 0 0 15px rgba(0, 255, 136, 0.6); }
-
+        #qr-phase { display: none; }
+        #qrcode-container { background: white; padding: 20px; display: inline-block; border-radius: 10px; margin-bottom: 20px; }
         input[type="file"] { display: none; }
-
-        /* --- QR Section --- */
-        #qr-phase { display: none; animation: fadeIn 0.5s; }
         
-        #qrcode-container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 25px; display: inline-block;
-            border: 3px solid #00ff88; border-radius: 15px;
-            margin-bottom: 30px; box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
-        }
+        #small-fs-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; color: #00ff88; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; }
         
-        .status-line { font-size: 14px; color: #aaa; margin-bottom: 20px; }
-        .blink { animation: blinker 2s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0.3; } }
-        
-        /* --- Animations Overlay --- */
-        #launch-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; z-index: 90; display: none;
-            justify-content: center; align-items: center;
-            flex-direction: column;
-        }
-        
-        .countdown-text { font-size: 10em; color: #00ff88; text-shadow: 0 0 50px #00ff88; text-align: center;}
-        .sub-text { font-size: 2rem; color: white; letter-spacing: 10px; margin-top: 20px; opacity: 0.7; }
-        
+        /* Animation Overlay */
+        #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        .countdown-text { font-size: 10em; color: #00ff88; text-shadow: 0 0 50px #00ff88; }
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
-        .quick-cycle { animation: flashAnim 0.3s ease-out forwards; }
-
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
-
-        /* --- Media --- */
-        video, img { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            object-fit: contain; display: none; z-index: 100; background: black;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
     </style>
 </head>
 <body>
-
     <div class="stars"></div>
     <div id="interface">
         <div id="upload-phase">
             <h1>/// Data Uplink ///</h1>
-            <p class="status-line">AWAITING MEDIA INPUT...</p>
             <button class="btn" onclick="document.getElementById('fileInput').click()">[ UPLOAD PAYLOAD ]</button>
             <input type="file" id="fileInput" accept="video/*,image/*" onchange="handleFile(this)">
         </div>
-
         <div id="qr-phase">
             <h1>/// Secure Link ///</h1>
             <div id="qrcode-container"><div id="qrcode"></div></div>
-            <p id="connection-status" class="status-line blink">WAITING FOR REMOTE TERMINAL...</p>
+            <p id="status-text" style="color:#aaa; margin-bottom:20px;">WAITING FOR REMOTE...</p>
             <button id="arm-btn" class="btn" onclick="armSystem()">Initialize Display</button>
         </div>
     </div>
     
-    <button id="small-fs-btn" class="btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
-
-    <div id="launch-overlay">
-        <div id="countdown" class="countdown-text"></div>
-        <div id="subtext" class="sub-text"></div>
-    </div>
-
+    <button id="small-fs-btn" class="btn" onclick="toggleFullscreen()">⛶</button>
+    <div id="launch-overlay"><div id="countdown" class="countdown-text"></div></div>
     <video id="mainVideo" playsinline></video>
     <img id="mainImage">
 
-    <script>
-        // *** STUN SERVER CONFIG ADDED HERE ***
-        const peer = new Peer({
-            config: {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' }
-                ]
-            }
-        });
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        let myId = "";
+        // YOUR CONFIG (Used from previous chat)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbcNbPBSnxztpnqG1jCcynCShjxukqjhs",
+            authDomain: "billy-app-efa3f.firebaseapp.com",
+            projectId: "billy-app-efa3f",
+            storageBucket: "billy-app-efa3f.firebasestorage.app",
+            messagingSenderId: "311034808403",
+            appId: "1:311034808403:web:cfe79efa9faa68889ddea6",
+            measurementId: "G-XQ3RKKDTHN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        // Generate a random 4-digit session ID so multiple people can use the app
+        const sessionId = Math.floor(1000 + Math.random() * 9000);
+        console.log("Session ID:", sessionId);
+
         let mediaType = "";
         let audioCtx; 
 
-        // --- SOUND ENGINE ---
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // --- AUDIO & FULLSCREEN FUNCTIONS (Same as before) ---
+        window.initAudio = () => { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); };
+        window.playBeep = () => {
+            if (!audioCtx) window.initAudio();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime+0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3);
+            osc.start(); osc.stop(audioCtx.currentTime+0.3);
+        };
+        window.playLaunchSound = () => {
+            if (!audioCtx) window.initAudio();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime+1);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+1.5);
+            osc.start(); osc.stop(audioCtx.currentTime+1.5);
+        };
+        window.toggleFullscreen = () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err=>{});
+            else if (document.exitFullscreen) document.exitFullscreen();
         }
 
-        function playBeep() {
-            if (!audioCtx) initAudio();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
-            osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.3);
-        }
-
-        function playLaunchSound() {
-            if (!audioCtx) initAudio();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 1);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 1.5);
-        }
-
-        function playGlitchSound() {
-            if (!audioCtx) initAudio();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(50, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
-        }
-        // -------------------
-
-        peer.on('open', (id) => { myId = id; });
-
-        peer.on('connection', (conn) => {
-            const status = document.getElementById('connection-status');
-            status.innerText = ">>> LINK ESTABLISHED <<<";
-            status.style.color = "#00ff88";
-            status.classList.remove('blink');
-            const btn = document.getElementById('arm-btn');
-            btn.style.boxShadow = "0 0 20px #00ff88";
-            btn.innerText = "[ GO TO LAUNCH MODE ]";
-
-            conn.on('data', (data) => {
-                if (data === 'PLAY') startLaunchSequence();
-            });
-        });
-
-        function handleFile(input) {
-            initAudio(); // Wake up audio engine
+        // --- MAIN LOGIC ---
+        window.handleFile = (input) => {
+            window.initAudio();
             const file = input.files[0];
             if (!file) return;
-            
             const url = URL.createObjectURL(file);
 
             if (file.type.startsWith('video')) {
                 mediaType = 'video';
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
-                
-                // --- LOOP LOGIC ---
                 vid.onended = function() {
+                    // Loop Logic
                     vid.style.display = 'none';
                     const overlay = document.getElementById('launch-overlay');
-                    document.getElementById('countdown').innerText = "";
-                    document.getElementById('subtext').innerText = "";
-                    
-                    overlay.style.display = 'flex';
                     overlay.classList.remove('launch-flash');
-                    overlay.classList.remove('quick-cycle');
-                    void overlay.offsetWidth; 
-                    overlay.classList.add('quick-cycle');
-
-                    playGlitchSound(); 
-
-                    setTimeout(() => {
-                         overlay.style.display = 'none';
-                         vid.style.display = 'block';
-                         vid.currentTime = 0;
-                         vid.play();
-                    }, 300);
+                    overlay.style.display = 'flex';
+                    setTimeout(() => { overlay.style.display = 'none'; vid.style.display = 'block'; vid.currentTime = 0; vid.play(); }, 500);
                 };
-
-            } else if (file.type.startsWith('image')) {
+            } else {
                 mediaType = 'image';
                 document.getElementById('mainImage').src = url;
             }
 
+            // Reset Firebase Status first
+            set(ref(db, 'sessions/' + sessionId), 'WAITING');
+
+            // UI Transition
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'block';
             
+            // Generate QR
             const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            const triggerUrl = `${baseUrl}/remote.html?id=${myId}`;
+            const triggerUrl = `${baseUrl}/remote.html?id=${sessionId}`;
             document.getElementById('qrcode').innerHTML = "";
             new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 200, height: 200 });
+
+            // LISTEN FOR TRIGGER
+            onValue(ref(db, 'sessions/' + sessionId), (snapshot) => {
+                const status = snapshot.val();
+                if (status === 'CONNECTED') {
+                    const st = document.getElementById('status-text');
+                    st.innerText = ">>> LINK ESTABLISHED <<<";
+                    st.style.color = "#00ff88";
+                    document.getElementById('arm-btn').innerText = "[ GO TO LAUNCH MODE ]";
+                }
+                if (status === 'PLAY') {
+                    startLaunchSequence();
+                }
+            });
         }
 
-        function armSystem() {
-            initAudio(); 
-            toggleFullscreen();
+        window.armSystem = () => {
+            window.toggleFullscreen();
             const ui = document.getElementById('interface');
             ui.style.opacity = '0';
             document.getElementById('small-fs-btn').style.opacity = '0';
-            setTimeout(() => { 
-                ui.style.display = 'none'; 
-                document.getElementById('small-fs-btn').style.display = 'none';
-            }, 500);
+            setTimeout(() => { ui.style.display = 'none'; document.getElementById('small-fs-btn').style.display = 'none';}, 500);
             document.body.style.cursor = 'none';
-        }
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => {});
-            else if (document.exitFullscreen) document.exitFullscreen();
         }
 
         function startLaunchSequence() {
@@ -299,48 +175,30 @@
             
             const overlay = document.getElementById('launch-overlay');
             const countdown = document.getElementById('countdown');
-            const sub = document.getElementById('subtext');
-            
-            overlay.classList.remove('quick-cycle');
             overlay.style.display = 'flex';
-            count = 3;
             
-            countdown.style.fontSize = "10em";
+            let count = 3;
             countdown.innerText = count;
-            sub.innerText = "INITIATING LAUNCH";
-            playBeep();
+            window.playBeep();
 
             const timer = setInterval(() => {
                 count--;
-                if (count > 0) {
-                    countdown.innerText = count;
-                    playBeep();
-                }
-                else if (count === 0) {
-                    countdown.innerText = "LAUNCH";
-                    playLaunchSound();
-                }
+                if (count > 0) { countdown.innerText = count; window.playBeep(); }
+                else if (count === 0) { countdown.innerText = "LAUNCH"; window.playLaunchSound(); }
                 else {
                     clearInterval(timer);
                     overlay.classList.add('launch-flash');
                     setTimeout(() => {
                         overlay.style.display = 'none';
-                        launchMedia();
+                        if (mediaType === 'video') {
+                            const vid = document.getElementById('mainVideo');
+                            vid.style.display = 'block'; vid.currentTime = 0; vid.play();
+                        } else {
+                            document.getElementById('mainImage').style.display = 'block';
+                        }
                     }, 500);
                 }
             }, 1000);
-        }
-
-        function launchMedia() {
-            if (mediaType === 'video') {
-                const vid = document.getElementById('mainVideo');
-                vid.style.display = 'block';
-                vid.currentTime = 0;
-                vid.play();
-            } else {
-                const img = document.getElementById('mainImage');
-                img.style.display = 'block';
-            }
         }
     </script>
 </body>
