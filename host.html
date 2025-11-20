@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ceremony Screen</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { background-color: #000; color: white; font-family: sans-serif; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        #setup-panel { text-align: center; z-index: 10; background: rgba(0,0,0,0.8); padding: 40px; border-radius: 20px; border: 1px solid #333; }
+        input[type="file"] { display: none; }
+        .btn { padding: 15px 30px; font-size: 20px; background: #0070f3; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 20px 0; }
+        #qrcode { margin-top: 20px; padding: 10px; background: white; display: inline-block; border-radius: 8px;}
+        video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 1; }
+        h2 { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="setup-panel">
+        <h2>1. Select Video</h2>
+        <button class="btn" onclick="document.getElementById('videoInput').click()">Choose File</button>
+        <input type="file" id="videoInput" accept="video/*" onchange="handleFile(this)">
+        
+        <div id="qr-container" style="display:none;">
+            <h2>2. Scan to Start</h2>
+            <div id="qrcode"></div>
+            <p>Waiting for phone...</p>
+        </div>
+    </div>
+
+    <video id="mainVideo"></video>
+
+    <script>
+        const peer = new Peer(); // Auto-generates an ID
+        let myId = "";
+
+        peer.on('open', (id) => {
+            myId = id;
+            console.log("My ID is: " + id);
+        });
+
+        peer.on('connection', (conn) => {
+            conn.on('data', (data) => {
+                if (data === 'PLAY') {
+                    startCeremony();
+                }
+            });
+        });
+
+        function handleFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            // Create a local URL (No upload needed)
+            const url = URL.createObjectURL(file);
+            const video = document.getElementById('mainVideo');
+            video.src = url;
+
+            // Show QR Code
+            document.getElementById('qr-container').style.display = 'block';
+            
+            // Generate QR Link
+            // Replaces 'host.html' with 'remote.html' in the current URL
+            const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+            const triggerUrl = `${baseUrl}/remote.html?id=${myId}`;
+            
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), {
+                text: triggerUrl,
+                width: 250,
+                height: 250
+            });
+        }
+
+        function startCeremony() {
+            const video = document.getElementById('mainVideo');
+            document.getElementById('setup-panel').style.display = 'none'; // Hide menu
+            video.style.display = 'block'; // Show video
+            video.play();
+        }
+    </script>
+</body>
+</html>
