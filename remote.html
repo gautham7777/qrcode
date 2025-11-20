@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body { background-color: #111; color: white; font-family: sans-serif; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #status { margin-bottom: 20px; color: #888; }
+        button { width: 250px; height: 250px; border-radius: 50%; border: none; font-size: 24px; font-weight: bold; color: white; background: #e63946; box-shadow: 0 0 20px rgba(230, 57, 70, 0.5); cursor: pointer; transition: transform 0.1s; }
+        button:active { transform: scale(0.95); background: #d62828; }
+        button:disabled { background: #444; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <p id="status">Connecting...</p>
+    <button id="btn" onclick="trigger()" disabled>START<br>CEREMONY</button>
+
+    <script>
+        const peer = new Peer();
+        let conn;
+
+        // Get the Host ID from the URL (?id=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const hostId = urlParams.get('id');
+
+        peer.on('open', () => {
+            if (!hostId) {
+                document.getElementById('status').innerText = "Error: No Host ID found.";
+                return;
+            }
+
+            // Connect to the Host
+            conn = peer.connect(hostId);
+
+            conn.on('open', () => {
+                document.getElementById('status').innerText = "Connected & Ready";
+                document.getElementById('status').style.color = "#4cc9f0";
+                document.getElementById('btn').disabled = false;
+            });
+        });
+
+        function trigger() {
+            if (conn) {
+                conn.send('PLAY');
+                document.getElementById('btn').innerText = "PLAYING!";
+                document.getElementById('btn').style.background = "#2a9d8f";
+            }
+        }
+    </script>
+</body>
+</html>
