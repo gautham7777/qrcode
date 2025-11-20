@@ -2,48 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ceremony Screen</title>
+    <title>Ceremony Host</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { background-color: #000; color: white; font-family: sans-serif; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
-        #setup-panel { text-align: center; z-index: 10; background: rgba(0,0,0,0.8); padding: 40px; border-radius: 20px; border: 1px solid #333; }
+        body { 
+            background-color: black; color: white; font-family: sans-serif; 
+            height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; 
+            overflow: hidden;
+        }
+        
+        /* The Setup Button (Visible only at start) */
+        #setup-btn { 
+            padding: 20px 40px; font-size: 24px; font-weight: bold; 
+            background: white; color: black; border: none; border-radius: 50px; 
+            cursor: pointer; z-index: 20;
+            box-shadow: 0 0 30px rgba(255,255,255,0.5);
+            transition: transform 0.2s;
+        }
+        #setup-btn:hover { transform: scale(1.05); }
         input[type="file"] { display: none; }
-        .btn { padding: 15px 30px; font-size: 20px; background: #0070f3; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 20px 0; }
-        #qrcode { margin-top: 20px; padding: 10px; background: white; display: inline-block; border-radius: 8px;}
-        video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 1; }
-        h2 { margin-bottom: 10px; }
+
+        /* The QR Container (Centered on black screen) */
+        #qr-container { 
+            text-align: center; z-index: 10; display: none;
+            animation: fadeIn 1s ease;
+        }
+        #qrcode { 
+            background: white; padding: 20px; border-radius: 20px; 
+            display: inline-block; margin-bottom: 20px;
+        }
+        h2 { margin: 0; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; color: #888; }
+
+        /* Media Elements (Hidden until trigger) */
+        video, img { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            object-fit: contain; display: none; z-index: 5; background: black;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="setup-panel">
-        <h2>1. Select Video</h2>
-        <button class="btn" onclick="document.getElementById('videoInput').click()">Choose File</button>
-        <input type="file" id="videoInput" accept="video/*" onchange="handleFile(this)">
-        
-        <div id="qr-container" style="display:none;">
-            <h2>2. Scan to Start</h2>
-            <div id="qrcode"></div>
-            <p>Waiting for phone...</p>
-        </div>
+    <button id="setup-btn" onclick="document.getElementById('fileInput').click()">📂 LOAD MEDIA</button>
+    <input type="file" id="fileInput" accept="video/*,image/*" onchange="handleFile(this)">
+
+    <div id="qr-container">
+        <div id="qrcode"></div>
+        <h2>Scan to Launch</h2>
     </div>
 
-    <video id="mainVideo"></video>
+    <video id="mainVideo" playsinline></video>
+    <img id="mainImage">
 
     <script>
-        const peer = new Peer(); // Auto-generates an ID
+        const peer = new Peer(); 
         let myId = "";
+        let mediaType = ""; // 'video' or 'image'
 
-        peer.on('open', (id) => {
-            myId = id;
-            console.log("My ID is: " + id);
-        });
+        peer.on('open', (id) => { myId = id; });
 
         peer.on('connection', (conn) => {
+            // Visual cue that phone connected
+            document.querySelector('h2').innerText = "• SYSTEM LINKED •";
+            document.querySelector('h2').style.color = "#00ff88";
+
             conn.on('data', (data) => {
                 if (data === 'PLAY') {
-                    startCeremony();
+                    launchMedia();
                 }
             });
         });
@@ -52,33 +79,56 @@
             const file = input.files[0];
             if (!file) return;
             
-            // Create a local URL (No upload needed)
             const url = URL.createObjectURL(file);
-            const video = document.getElementById('mainVideo');
-            video.src = url;
 
-            // Show QR Code
+            // Check if it is video or image
+            if (file.type.startsWith('video')) {
+                mediaType = 'video';
+                document.getElementById('mainVideo').src = url;
+            } else if (file.type.startsWith('image')) {
+                mediaType = 'image';
+                document.getElementById('mainImage').src = url;
+            }
+
+            // 1. Hide Upload Button
+            document.getElementById('setup-btn').style.display = 'none';
+            
+            // 2. Show QR Code
             document.getElementById('qr-container').style.display = 'block';
             
-            // Generate QR Link
-            // Replaces 'host.html' with 'remote.html' in the current URL
+            // 3. Generate QR Link
             const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
             const triggerUrl = `${baseUrl}/remote.html?id=${myId}`;
-            
             document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), {
-                text: triggerUrl,
-                width: 250,
-                height: 250
-            });
+            new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 250, height: 250 });
+
+            // 4. ATTEMPT FULL SCREEN (Browser might block this, so we try)
+            enterFullscreen();
         }
 
-        function startCeremony() {
-            const video = document.getElementById('mainVideo');
-            document.getElementById('setup-panel').style.display = 'none'; // Hide menu
-            video.style.display = 'block'; // Show video
-            video.play();
+        function launchMedia() {
+            // Hide QR
+            document.getElementById('qr-container').style.display = 'none';
+            document.body.style.cursor = 'none';
+
+            if (mediaType === 'video') {
+                const vid = document.getElementById('mainVideo');
+                vid.style.display = 'block';
+                vid.play();
+            } else {
+                const img = document.getElementById('mainImage');
+                img.style.display = 'block';
+            }
         }
+
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen().catch(err => {});
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+        }
+
+        // Fallback: Click anywhere to fix fullscreen if it failed initially
+        document.body.addEventListener('click', enterFullscreen);
     </script>
 </body>
 </html>
