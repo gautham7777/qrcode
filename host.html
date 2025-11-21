@@ -9,59 +9,88 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        /* 1. IMPORT SCI-FI FONT */
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Share+Tech+Mono&display=swap');
+        /* --- 1. IMPORT SCI-FI FONTS --- */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Rajdhani:wght@500;700&display=swap');
         
-        /* 2. DEEP SPACE BACKGROUND */
+        /* --- 2. DEEP SPACE BACKGROUND --- */
         body { 
             background-color: #000; 
-            margin: 0; 
+            color: #00ff88; /* Neon Green */
+            font-family: 'Rajdhani', sans-serif; 
             height: 100vh; 
+            margin: 0; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             overflow: hidden; 
-            font-family: 'Orbitron', sans-serif; /* New Font */
-            color: #00ff88; 
-            background: radial-gradient(circle at center, #0a1510 0%, #000000 100%);
+            background: radial-gradient(circle at center, #05100a 0%, #000000 90%);
         }
 
-        /* Star Animation (Kept same) */
-        .stars { width: 1px; height: 1px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; animation: animStar 100s linear infinite; position: absolute; top: 0; left: 0; z-index: -2; }
+        /* Moving Stars Animation */
+        .stars { 
+            width: 2px; height: 2px; 
+            background: transparent; 
+            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 800px 100px #FFF; 
+            animation: animStar 150s linear infinite; 
+            position: absolute; top: 0; left: 0; z-index: -2; 
+        }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
 
-        /* 3. THE MAIN PANEL (Glassmorphism & Glow) */
+        /* Subtle Grid */
+        .grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1;
+        }
+
+        /* --- 3. THE INTERFACE BOX (Glass + Tech Borders) --- */
         #interface { 
-            background: rgba(0, 20, 10, 0.8); 
-            backdrop-filter: blur(10px); 
-            border: 2px solid #00ff88; 
-            padding: 60px; 
-            border-radius: 0px; /* Sharp corners look more techy */
+            background: rgba(0, 20, 10, 0.7); 
+            backdrop-filter: blur(15px); 
+            border: 1px solid rgba(0, 255, 136, 0.3); 
+            padding: 80px; 
+            border-radius: 0px; 
             text-align: center; 
             z-index: 10; 
             transition: opacity 0.5s; 
             width: 100%; 
-            max-width: 700px; /* Made wider for TV */
-            box-shadow: 0 0 60px rgba(0, 255, 136, 0.15); /* Glowing aura */
+            max-width: 700px; 
+            position: relative;
+            box-shadow: 0 0 80px rgba(0, 255, 136, 0.1);
         }
 
-        /* Typography Upgrades */
+        /* HUD Corners (The "Future" Look) */
+        #interface::before { 
+            content: ''; position: absolute; top: -2px; left: -2px; 
+            width: 40px; height: 40px; 
+            border-top: 4px solid #00ff88; border-left: 4px solid #00ff88; 
+        }
+        #interface::after { 
+            content: ''; position: absolute; bottom: -2px; right: -2px; 
+            width: 40px; height: 40px; 
+            border-bottom: 4px solid #00ff88; border-right: 4px solid #00ff88; 
+        }
+
+        /* Headings */
         h1 { 
             margin: 0 0 50px 0; 
-            font-size: 3rem; /* Bigger */
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem; 
             letter-spacing: 8px; 
             text-transform: uppercase; 
             color: #fff; 
-            text-shadow: 0 0 20px #00ff88; /* Neon Text */
-            border-bottom: 1px solid rgba(0, 255, 136, 0.3); 
+            text-shadow: 0 0 25px #00ff88; 
+            border-bottom: 1px solid rgba(0,255,136,0.2); 
             padding-bottom: 30px; 
         }
 
-        /* Button Upgrades */
+        /* Buttons */
         .btn { 
-            padding: 30px 60px; 
+            padding: 30px 70px; 
             font-family: 'Orbitron', sans-serif; 
-            font-size: 1.5rem; 
+            font-size: 1.8rem; 
             color: #00ff88; 
             background: rgba(0, 255, 136, 0.05); 
             border: 2px solid #00ff88; 
@@ -70,8 +99,8 @@
             width: 100%; 
             transition: 0.2s;
             letter-spacing: 4px;
+            margin-top: 20px;
         }
-
         .btn:hover { 
             background: #00ff88; 
             color: black; 
@@ -80,30 +109,32 @@
 
         #qr-phase { display: none; }
         
-        /* 4. QR CODE CONTAINER (Centered & Glowing) */
+        /* --- 4. QR CODE AREA (Untouched Logic, Better Style) --- */
         #qrcode-container { 
             background: white; 
             padding: 25px; 
-            display: block; 
+            display: block; /* Keeps it centered */
             width: fit-content; 
             margin: 0 auto 40px auto; 
-            border: 0px; 
-            box-shadow: 0 0 50px rgba(0, 255, 136, 0.4); /* Glow around the QR */
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3); /* Glow */
+            border: 2px solid #00ff88;
         }
 
+        /* Status Text */
         #status-text {
-            font-size: 1.5rem;
-            letter-spacing: 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 6px;
             color: #00ff88;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
             animation: pulse 2s infinite;
+            text-transform: uppercase;
         }
-        @keyframes pulse { 50% { opacity: 0.6; } }
+        @keyframes pulse { 50% { opacity: 0.5; } }
 
-        /* Hidden Elements */
+        /* --- 5. UTILITIES --- */
         input[type="file"] { display: none; }
         
-        /* Fullscreen Button (Made subtle) */
         #small-fs-btn { 
             position: fixed; bottom: 30px; right: 30px; 
             width: 60px; height: 60px; 
@@ -113,21 +144,24 @@
             font-size: 24px; 
             display: flex; justify-content: center; align-items: center; 
             cursor: pointer; z-index: 100; 
-            opacity: 0.3;
+            border-radius: 50%;
+            opacity: 0.4;
             transition: 0.3s;
         }
-        #small-fs-btn:hover { opacity: 1; background: rgba(0, 255, 136, 0.1); box-shadow: 0 0 20px #00ff88; }
+        #small-fs-btn:hover { opacity: 1; background: rgba(0, 255, 136, 0.2); box-shadow: 0 0 20px #00ff88; }
 
-        /* Overlays */
         #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        .countdown-text { font-family: 'Orbitron'; font-size: 20em; color: #fff; text-shadow: 0 0 100px #00ff88; }
+        .countdown-text { font-family: 'Orbitron'; font-size: 25em; color: #00ff88; text-shadow: 0 0 100px #00ff88; }
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
+        
         video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
     </style>
 </head>
 <body>
     <div class="stars"></div>
+    <div class="grid"></div>
+
     <div id="interface">
         <div id="upload-phase">
             <h1>/// SYSTEM UPLINK ///</h1>
@@ -147,13 +181,12 @@
     <img id="mainImage">
 
     <script>
-        // --- YOUR KEYS ARE SET HERE ---
+        // --- EXACT LOGIC FROM YOUR WORKING VERSION ---
         const pubnub = new PubNub({
             publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
             subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
             userId: "host_laptop"
         });
-        // ------------------------------
 
         const channelID = "ceremony_" + Math.floor(Math.random() * 99999);
         let mediaType = "";
@@ -194,7 +227,7 @@
             const file = input.files[0];
             if (!file) return;
             
-            // HIDE FULLSCREEN BUTTON ON UPLOAD
+            // REMOVE FULLSCREEN BUTTON ON UPLOAD
             document.getElementById('small-fs-btn').style.display = 'none';
 
             const url = URL.createObjectURL(file);
@@ -222,13 +255,13 @@
             const triggerUrl = `${baseUrl}/remote.html?ch=${channelID}`;
             document.getElementById('qrcode').innerHTML = "";
             
-            // SCALED UP QR CODE (300px)
+            // QR Code Generation
             new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 300, height: 300 });
         }
 
         function startLaunchSequence() {
+            // Hide UI elements
             document.getElementById('interface').style.display = 'none';
-            // Double ensure button is gone
             document.getElementById('small-fs-btn').style.display = 'none';
             document.body.style.cursor = 'none';
             
