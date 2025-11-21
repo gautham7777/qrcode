@@ -3,28 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mission Control // Select Mode</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-        body { background-color: #050510; color: #00ff88; font-family: 'Share Tech Mono', monospace; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
-        .stars { width: 1px; height: 1px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF; animation: animStar 100s linear infinite; position: absolute; top: 0; left: 0; z-index: -1; }
-        @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-        .container { text-align: center; background: rgba(0, 20, 10, 0.6); backdrop-filter: blur(12px); padding: 40px; border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 16px; box-shadow: 0 0 50px rgba(0, 255, 136, 0.1); max-width: 350px; width: 85%; }
-        h1 { margin: 0 0 30px 0; font-size: 28px; letter-spacing: 2px; color: white; border-bottom: 1px solid rgba(0,255,136,0.2); padding-bottom: 15px; }
-        .btn { display: block; width: 100%; padding: 20px 0; margin-bottom: 20px; font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: bold; border-radius: 8px; cursor: pointer; text-decoration: none; transition: all 0.2s; text-transform: uppercase; box-sizing: border-box; }
-        .btn-host { color: #050510; background: #00ff88; border: 1px solid #00ff88; }
-        .btn-host:hover { background: white; transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
-        .btn-remote { color: #ff4d4d; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; }
-        .btn-remote:hover { background: #ff4d4d; color: black; transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 77, 77, 0.6); }
-    </style>
+    <title>Space Portfolio - Main</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="stars"></div>
-    <div class="container">
-        <h1>SELECT MODE</h1>
-        <a href="host.html" class="btn btn-host">HOST SCREEN</a>
-        <a href="remote.html" class="btn btn-remote">REMOTE CONTROL</a>
+
+    <div id="landing-section">
+        <div class="content">
+            <h1>WELCOME TO MY UNIVERSE</h1>
+            <p>Initiate launch sequence.</p>
+            <button id="launch-btn">LAUNCH EXPERIENCE</button>
+        </div>
+        
+        <div class="spaceship-container">
+            <img src="assets/spaceship.png" id="spaceship" alt="Spaceship">
+        </div>
     </div>
+
+    <div id="qr-section">
+        <div class="qr-card">
+            <h2>SYSTEM UNLOCKED</h2>
+            <p class="sub-text">Scan to establish remote link</p>
+            
+            <div class="qr-frame">
+                <img src="assets/qrcode.png" alt="QR Code" class="qr-img">
+                <div class="scanner-line"></div>
+            </div>
+            
+            <div class="status-text">
+                <span class="blink">●</span> WAITING FOR SIGNAL...
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
