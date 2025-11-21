@@ -75,7 +75,6 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 100px rgba(0, 243, 255, 0.2);
-            overflow: hidden; 
         }
 
         /* Animated Corners */
@@ -114,28 +113,9 @@
             justify-content: center;
             align-items: center;
         }
-
-        /* Force the image to fit inside the box */
-        #qrcode img, #qrcode canvas {
-            display: block !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
-            width: auto !important;
-            height: auto !important;
-            object-fit: contain !important;
-        }
-
-        /* --- GHOST IMAGE FIX (THE NUCLEAR OPTION) --- */
-        /* This targets ANY image attached to the body that isn't our main display image */
-        body > img:not(#mainImage) {
-            display: none !important;
-            opacity: 0 !important;
-            width: 0 !important;
-            height: 0 !important;
-            position: fixed;
-            top: -9999px;
-            left: -9999px;
-        }
+        
+        /* Simple safety rule */
+        body > img:not(#mainImage) { display: none !important; }
 
         .status-text {
             margin-top: 40px;
@@ -148,7 +128,7 @@
         }
         @keyframes pulse { 50% { opacity: 0.4; } }
 
-        /* --- FULLSCREEN BUTTON (Bottom Right) --- */
+        /* --- FULLSCREEN BUTTON --- */
         #fs-toggle {
             position: fixed;
             bottom: 30px;
@@ -168,11 +148,7 @@
             align-items: center;
             z-index: 100;
         }
-        #fs-toggle:hover {
-            opacity: 1;
-            background: rgba(0, 243, 255, 0.2);
-            box-shadow: 0 0 20px #00f3ff;
-        }
+        #fs-toggle:hover { opacity: 1; background: rgba(0, 243, 255, 0.2); }
 
         /* --- UPLOAD BUTTON --- */
         .btn {
@@ -219,15 +195,12 @@
 
         <div id="qr-phase">
             <h1>Awaiting Signal</h1>
-            
             <div class="scanner-frame">
                 <div class="corner tl"></div><div class="corner tr"></div>
                 <div class="corner bl"></div><div class="corner br"></div>
                 <div class="laser"></div>
-                
                 <div id="qrcode"></div>
             </div>
-
             <div class="status-text">IGNITE THE HORIZON</div>
         </div>
     </div>
@@ -237,7 +210,6 @@
     <img id="mainImage">
 
     <script>
-        // --- LOGIC ---
         const pubnub = new PubNub({
             publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
             subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
@@ -248,7 +220,6 @@
 
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         
-        // Sound FX
         function playTone(freq, type, dur) {
             if(!audioCtx) initAudio();
             const osc = audioCtx.createOscillator(); 
@@ -264,13 +235,9 @@
 
         function toggleFS() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                });
+                document.documentElement.requestFullscreen().catch(err => {});
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                if (document.exitFullscreen) document.exitFullscreen();
             }
         }
 
@@ -278,11 +245,10 @@
             const file = input.files[0];
             if(!file) return;
             
-            // 1. REMOVE FULLSCREEN BUTTON IMMEDIATELY
+            // 1. HIDE FULLSCREEN BUTTON
             document.getElementById('fs-toggle').style.display = 'none';
 
             const url = URL.createObjectURL(file);
-            
             if(file.type.startsWith('video')) {
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
@@ -300,26 +266,40 @@
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'flex'; 
             
-            // Generate QR - CLEAN UP FIRST
+            // 2. GENERATE AND CLEAN
             const link = window.location.href.replace('host.html', '') + 'remote.html?ch=' + channelID;
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = ""; 
             
-            // Extra cleanup of body-attached images
-            document.querySelectorAll("body > img:not(#mainImage)").forEach(el => el.remove());
+            new QRCode(qrContainer, { text: link, width: 400, height: 400 });
 
+            // --- THE BRUTE FORCE CLEANUP SCRIPT ---
             setTimeout(() => {
-                new QRCode(qrContainer, { text: link, width: 400, height: 400 });
-            }, 50);
+                // Loop through ALL images on the page
+                const allImages = document.getElementsByTagName('img');
+                const qrBox = document.getElementById('qrcode');
+                const mainImg = document.getElementById('mainImage');
 
-            // Listen for GO
+                // Loop backwards to remove safely
+                for (let i = allImages.length - 1; i >= 0; i--) {
+                    const img = allImages[i];
+                    
+                    // If it's not the payload image, and it's NOT inside the QR box...
+                    if (img !== mainImg && !qrBox.contains(img)) {
+                        // DELETE IT
+                        img.parentNode.removeChild(img);
+                    }
+                }
+            }, 100); // Run 100ms after generation
+            // ---------------------------------------
+
             pubnub.subscribe({ channels: [channelID] });
             pubnub.addListener({ message: (m) => { if(m.message === 'GO') launch(); } });
         }
 
         function launch() {
-            // Hide UI immediately on launch signal
             document.getElementById('interface').style.display = 'none';
+            document.getElementById('fs-toggle').style.display = 'none';
             
             const overlay = document.getElementById('launch-overlay');
             const count = document.getElementById('countdown');
@@ -337,8 +317,8 @@
                 } else {
                     clearInterval(timer);
                     count.innerText = "";
-                    playTone(100, 'sawtooth', 2.0); // Boom
-                    overlay.style.background = 'white'; // Flash
+                    playTone(100, 'sawtooth', 2.0);
+                    overlay.style.background = 'white'; 
                     setTimeout(() => {
                         overlay.style.display = 'none';
                         overlay.style.background = 'black';
