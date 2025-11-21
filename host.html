@@ -125,11 +125,16 @@
             object-fit: contain !important;
         }
 
-        /* --- GHOST IMAGE FIX --- */
-        body > img:not(#mainImage), body > canvas {
+        /* --- GHOST IMAGE FIX (THE NUCLEAR OPTION) --- */
+        /* This targets ANY image attached to the body that isn't our main display image */
+        body > img:not(#mainImage) {
             display: none !important;
             opacity: 0 !important;
-            pointer-events: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
         }
 
         .status-text {
@@ -272,6 +277,10 @@
         function handleFile(input) {
             const file = input.files[0];
             if(!file) return;
+            
+            // 1. REMOVE FULLSCREEN BUTTON IMMEDIATELY
+            document.getElementById('fs-toggle').style.display = 'none';
+
             const url = URL.createObjectURL(file);
             
             if(file.type.startsWith('video')) {
@@ -291,11 +300,14 @@
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'flex'; 
             
-            // Generate QR - BIGGER SIZE (400)
+            // Generate QR - CLEAN UP FIRST
             const link = window.location.href.replace('host.html', '') + 'remote.html?ch=' + channelID;
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = ""; 
             
+            // Extra cleanup of body-attached images
+            document.querySelectorAll("body > img:not(#mainImage)").forEach(el => el.remove());
+
             setTimeout(() => {
                 new QRCode(qrContainer, { text: link, width: 400, height: 400 });
             }, 50);
@@ -308,8 +320,6 @@
         function launch() {
             // Hide UI immediately on launch signal
             document.getElementById('interface').style.display = 'none';
-            // Hide the FS toggle button too
-            document.getElementById('fs-toggle').style.display = 'none';
             
             const overlay = document.getElementById('launch-overlay');
             const count = document.getElementById('countdown');
