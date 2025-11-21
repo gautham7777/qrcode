@@ -20,123 +20,174 @@
             overflow: hidden;
             font-family: 'Orbitron', sans-serif;
             touch-action: manipulation;
+            /* Deep Space Background */
+            background: radial-gradient(circle at center, #0a101a 0%, #000000 90%);
         }
 
-        /* BACKGROUND GRID */
-        .bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #1a2a3a 0%, #000000 90%);
-            z-index: -1;
-        }
-
+        /* --- UI TEXT --- */
         #header {
             position: absolute; top: 40px;
             color: #00f3ff;
             letter-spacing: 4px;
             font-size: 14px;
-            opacity: 0.7;
+            opacity: 0.5;
         }
 
         #status {
-            margin-bottom: 50px;
-            color: #ff3333;
-            font-size: 18px;
+            margin-bottom: 60px;
+            color: #555; /* Default gray */
+            font-size: 16px;
             letter-spacing: 2px;
-            text-shadow: 0 0 10px red;
+            text-transform: uppercase;
+            transition: color 0.5s;
+            text-align: center;
         }
 
-        /* THE BIG BUTTON CONTAINER */
+        /* --- BUTTON CONTAINER --- */
         .control-ring {
             position: relative;
             width: 280px; height: 280px;
             display: flex; justify-content: center; align-items: center;
         }
 
-        /* Spinning Rings */
+        /* --- THE BUTTON STYLES --- */
+        #launch-btn {
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            border: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            letter-spacing: 2px;
+            transition: all 0.5s ease;
+            position: relative;
+            z-index: 10;
+            -webkit-tap-highlight-color: transparent;
+            
+            /* STATE 1: GRAY / CONNECTING (Default) */
+            background: #222;
+            color: #555;
+            box-shadow: inset 0 0 20px #000;
+            cursor: not-allowed;
+            pointer-events: none; /* Blocks clicks */
+            border: 2px solid #333;
+        }
+
+        /* STATE 2: READY (Blue & Glowing) */
+        #launch-btn.ready {
+            background: radial-gradient(120% 120% at 30% 30%, #00f3ff, #004d66);
+            color: white;
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.4), inset 0 5px 10px rgba(255,255,255,0.5);
+            cursor: pointer;
+            pointer-events: auto; /* Enables clicks */
+            border: none;
+            font-size: 32px; /* Bigger text */
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        /* STATE 3: FIRED (Green) */
+        #launch-btn.fired {
+            background: radial-gradient(120% 120% at 30% 30%, #00ff88, #006633) !important;
+            box-shadow: 0 0 80px #00ff88 !important;
+            color: black !important;
+            animation: none;
+            transform: scale(0.95);
+        }
+
+        /* Rings Animation (Hidden when gray, visible when ready) */
         .spinner {
             position: absolute;
             width: 100%; height: 100%;
             border-radius: 50%;
             border: 2px dashed rgba(0, 243, 255, 0.3);
+            opacity: 0; /* Hidden by default */
+            transition: opacity 1s;
+        }
+        .spinner.spin-active {
+            opacity: 1;
             animation: spin 10s linear infinite;
         }
+        
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* THE BUTTON ITSELF */
-        #launch-btn {
-            width: 220px; height: 220px;
-            border-radius: 50%;
-            border: none;
-            background: radial-gradient(120% 120% at 30% 30%, #00f3ff, #004d66);
-            box-shadow: 0 10px 40px rgba(0, 243, 255, 0.4), inset 0 5px 10px rgba(255,255,255,0.5);
-            color: white;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 28px;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
-
-        #launch-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 0 60px #00f3ff;
-        }
-
-        #launch-btn:disabled {
-            background: #222;
-            color: #555;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        /* Success State */
-        .launched {
-            background: radial-gradient(120% 120% at 30% 30%, #00ff88, #006633) !important;
-            box-shadow: 0 0 80px #00ff88 !important;
-            color: black !important;
-            text-shadow: none !important;
-        }
+        @keyframes pulse-glow { from { box-shadow: 0 0 30px rgba(0,243,255,0.3); } to { box-shadow: 0 0 60px rgba(0,243,255,0.6); } }
 
     </style>
 </head>
 <body>
-    <div class="bg"></div>
+
     <div id="header">/// COMMAND LINK ///</div>
-    <div id="status">WAITING FOR SIGNAL...</div>
+    <div id="status">CONNECTING...</div>
 
     <div class="control-ring">
-        <div class="spinner"></div>
-        <button id="launch-btn" disabled onclick="fire()">LAUNCH</button>
+        <div class="spinner" id="ring"></div>
+        <button id="launch-btn">WAIT...</button>
     </div>
 
     <script>
+        // --- CONFIGURATION ---
         const pubnub = new PubNub({
             publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
             subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
-            userId: "remote"
+            userId: "remote_user"
         });
 
         const params = new URLSearchParams(window.location.search);
-        const ch = params.get('ch');
+        const channelID = params.get('ch');
+
         const btn = document.getElementById('launch-btn');
         const status = document.getElementById('status');
+        const ring = document.getElementById('ring');
 
-        if(ch) {
-            status.innerText = "READY TO FIRE";
-            status.style.color = "#00f3ff";
-            status.style.textShadow = "0 0 15px #00f3ff";
-            btn.disabled = false;
+        // --- INITIALIZATION SEQUENCE ---
+        if (channelID) {
+            // We have a link! But let's simulate a "connecting" moment for drama
+            // and to make sure the UI feels responsive when it switches.
+            
+            setTimeout(() => {
+                // 1. Update Status Text
+                status.innerText = "LINK ESTABLISHED";
+                status.style.color = "#00f3ff";
+                status.style.textShadow = "0 0 10px #00f3ff";
+
+                // 2. Activate Button
+                btn.classList.add('ready');
+                btn.innerText = "LAUNCH";
+                
+                // 3. Show Rings
+                ring.classList.add('spin-active');
+                
+                // 4. Add Click Listener
+                btn.addEventListener('click', firePayload);
+                
+            }, 1500); // 1.5 second delay to look like it's "connecting"
+
+        } else {
+            // Error state if no QR scan
+            status.innerText = "ERROR: SCAN QR AGAIN";
+            status.style.color = "red";
+            btn.innerText = "NO LINK";
         }
 
-        function fire() {
+        // --- FIRE LOGIC ---
+        function firePayload() {
+            // Visual Feedback
+            btn.classList.remove('ready');
+            btn.classList.add('fired');
             btn.innerText = "LIFTOFF";
-            btn.classList.add('launched');
-            status.innerText = "SIGNAL SENT";
-            status.style.color = "#00ff88";
             
-            pubnub.publish({ channel: ch, message: 'GO' });
-            if(navigator.vibrate) navigator.vibrate(200);
+            status.innerText = "COMMAND SENT";
+            status.style.color = "#00ff88";
+
+            // Haptics
+            if(navigator.vibrate) navigator.vibrate([100, 50, 500]);
+
+            // Send Signal
+            pubnub.publish({
+                channel: channelID,
+                message: 'GO'
+            });
+            
+            // Remove listener to prevent double clicks
+            btn.removeEventListener('click', firePayload);
         }
     </script>
 </body>
