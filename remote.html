@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote Control</title>
+    <title>Flight Controller</title>
     <style>
-        /* --- CSS STYLES --- */
+        /* --- COCKPIT CSS --- */
+        :root {
+            --neon-blue: #00f3ff;
+            --bg-color: #080a10;
+        }
+
         body {
-            background-color: #000000;
-            color: #fff;
+            background-color: var(--bg-color);
+            color: white;
             font-family: 'Courier New', Courier, monospace;
             height: 100vh;
             margin: 0;
@@ -16,95 +21,106 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            /* Subtle grid background */
+            background-image: linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
 
-        .header {
-            color: #00ff9d;
-            border-bottom: 1px solid #00ff9d;
-            padding-bottom: 5px;
-            margin-bottom: 40px;
-            letter-spacing: 2px;
+        .hud-panel {
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            padding: 30px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.05);
+            width: 80%;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
             font-size: 1.2rem;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
         }
 
-        .controller-grid {
+        .controls {
             display: grid;
-            grid-template-columns: repeat(3, 80px);
+            grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 80px);
             gap: 15px;
+            justify-items: center;
+            align-items: center;
         }
 
         .btn {
-            background: #111;
-            border: 2px solid #333;
-            border-radius: 10px;
-            color: #00ff9d;
-            font-size: 2rem;
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            background: rgba(10, 20, 40, 0.6);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-size: 1.5rem;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             cursor: pointer;
-            user-select: none;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
             transition: all 0.1s;
+            user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
 
         .btn:active {
-            background: #00ff9d;
+            background: var(--neon-blue);
             color: #000;
-            border-color: #00ff9d;
-            box-shadow: 0 0 15px #00ff9d;
-            transform: scale(0.95);
+            box-shadow: 0 0 30px var(--neon-blue);
+            transform: scale(0.9);
         }
 
-        /* Positioning buttons in grid */
+        /* Grid Positions */
         .up { grid-column: 2; grid-row: 1; }
         .left { grid-column: 1; grid-row: 2; }
         .right { grid-column: 3; grid-row: 2; }
         .down { grid-column: 2; grid-row: 3; }
         
-        .ok { 
-            grid-column: 2; 
-            grid-row: 2;
-            font-size: 1rem; 
-            font-weight: bold;
+        .select { 
+            grid-column: 2; grid-row: 2;
             border-radius: 50%;
-            border-color: #00ff9d;
-            background: rgba(0, 255, 157, 0.1);
+            font-size: 0.9rem;
+            font-weight: bold;
+            background: rgba(0, 243, 255, 0.1);
         }
 
-        .status-indicator {
-            margin-top: 50px;
+        .footer {
+            margin-top: 30px;
             font-size: 0.7rem;
-            color: #555;
-            letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px;
         }
+
     </style>
 </head>
 <body>
 
-    <div class="header">SYSTEM LINKED</div>
+    <div class="hud-panel">
+        <h2>Flight Deck</h2>
 
-    <div class="controller-grid">
-        <div class="btn up">▲</div>
-        <div class="btn left">◀</div>
-        <div class="btn ok">OK</div>
-        <div class="btn right">▶</div>
-        <div class="btn down">▼</div>
+        <div class="controls">
+            <div class="btn up">▲</div>
+            <div class="btn left">◀</div>
+            <div class="btn select">ENGAGE</div>
+            <div class="btn right">▶</div>
+            <div class="btn down">▼</div>
+        </div>
+
+        <div class="footer">SYSTEM: ONLINE</div>
     </div>
 
-    <div class="status-indicator">SIGNAL STABLE</div>
-
-    <script>
-        // You can add your socket.io or fetch logic here later
-        // For now, it just handles visual clicks
-        const buttons = document.querySelectorAll('.btn');
-        
-        buttons.forEach(btn => {
-            btn.addEventListener('touchstart', () => {
-                // Mobile touch feedback
-            }, {passive: true});
-        });
-    </script>
 </body>
 </html>
