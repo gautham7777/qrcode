@@ -12,8 +12,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
         
         body { 
-            background-color: #000005; 
-            color: #00ff88; 
+            background-color: #00000a; 
+            color: #00d2ff; 
             font-family: 'Share Tech Mono', monospace; 
             height: 100vh; 
             margin: 0; 
@@ -21,8 +21,8 @@
             justify-content: center; 
             align-items: center; 
             overflow: hidden; 
-            /* Deep Space Gradient */
-            background: radial-gradient(circle at center, #0b1021 0%, #000000 100%);
+            /* Deep Blue Space Gradient */
+            background: radial-gradient(circle at center, #050a1f 0%, #000000 100%);
         }
 
         /* SCANLINE OVERLAY */
@@ -31,44 +31,64 @@
             display: block;
             position: absolute;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background: linear-gradient(rgba(0, 10, 20, 0.1) 50%, rgba(0, 0, 0, 0.25) 50%);
             z-index: 2;
-            background-size: 100% 2px, 3px 100%;
+            background-size: 100% 2px;
             pointer-events: none;
+            opacity: 0.5;
         }
 
         /* STARS ANIMATION */
-        .stars { width: 2px; height: 2px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; animation: animStar 150s linear infinite; position: absolute; top: 0; left: 0; z-index: -1; opacity: 0.8; }
-        .stars2 { width: 3px; height: 3px; background: transparent; box-shadow: 100px 200px #aaf, 400px 500px #aaf, 300px 100px #aaf; animation: animStar 200s linear infinite; position: absolute; top: 0; left: 0; z-index: -1; opacity: 0.5; }
+        .stars, .stars2, .shooting-stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .stars { background: transparent; box-shadow: 124px 235px #fff, 20px 400px #fff, 500px 120px #fff, 50px 50px #fff; animation: animStar 150s linear infinite; opacity: 0.7; z-index: -1; }
+        .stars2 { background: transparent; box-shadow: 100px 200px #aaf, 400px 500px #aaf, 300px 100px #aaf; animation: animStar 200s linear infinite; opacity: 0.4; z-index: -1; }
+        .shooting-stars::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 2px;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%);
+            box-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
+            animation: shootingStar 6s linear infinite;
+            opacity: 0;
+        }
+
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
+        @keyframes shootingStar {
+            0% { transform: translate(-200px, -200px) rotate(-45deg); opacity: 1; width: 100px; }
+            20% { transform: translate(calc(100vw + 200px), calc(100vh + 200px)) rotate(-45deg); opacity: 0; width: 2px; }
+            100% { transform: translate(calc(100vw + 200px), calc(100vh + 200px)) rotate(-45deg); opacity: 0; width: 2px; }
+        }
 
         /* MAIN INTERFACE CARD */
         #interface { 
-            background: rgba(5, 10, 20, 0.7); 
-            backdrop-filter: blur(15px); 
-            border: 1px solid #00ff88; 
+            background: rgba(5, 15, 30, 0.6); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(0, 210, 255, 0.4); 
             padding: 60px; 
-            border-radius: 4px; 
+            border-radius: 8px; 
             text-align: center; 
             z-index: 10; 
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.15);
             position: relative;
-            width: 400px;
+            width: 420px;
         }
 
         /* Tech Corners */
-        #interface::before { content: ''; position: absolute; top: -2px; left: -2px; width: 30px; height: 30px; border-top: 4px solid #00ff88; border-left: 4px solid #00ff88; }
-        #interface::after { content: ''; position: absolute; bottom: -2px; right: -2px; width: 30px; height: 30px; border-bottom: 4px solid #00ff88; border-right: 4px solid #00ff88; }
+        #interface::before { content: ''; position: absolute; top: -4px; left: -4px; width: 40px; height: 40px; border-top: 2px solid #00d2ff; border-left: 2px solid #00d2ff; border-radius: 8px 0 0 0; }
+        #interface::after { content: ''; position: absolute; bottom: -4px; right: -4px; width: 40px; height: 40px; border-bottom: 2px solid #00d2ff; border-right: 2px solid #00d2ff; border-radius: 0 0 8px 0; }
 
         h1 { 
             margin: 0 0 40px 0; 
             font-family: 'Orbitron', sans-serif;
-            font-size: 28px; 
-            letter-spacing: 6px; 
+            font-size: 30px; 
+            letter-spacing: 4px; 
             text-transform: uppercase; 
-            color: #fff; 
-            text-shadow: 0 0 20px #00ff88;
-            border-bottom: 1px solid rgba(0,255,136,0.3); 
+            color: #e0f7ff; 
+            text-shadow: 0 0 20px #00d2ff;
+            border-bottom: 2px solid rgba(0, 210, 255, 0.3); 
             padding-bottom: 20px; 
         }
 
@@ -76,51 +96,88 @@
             padding: 20px 40px; 
             font-family: 'Share Tech Mono', monospace; 
             font-size: 20px; 
-            color: #00ff88; 
-            background: rgba(0, 20, 10, 0.6); 
-            border: 1px solid #00ff88; 
+            color: #00d2ff; 
+            background: rgba(0, 30, 50, 0.4); 
+            border: 1px solid #00d2ff; 
             cursor: pointer; 
             text-transform: uppercase; 
             width: 100%; 
             transition: all 0.3s;
             letter-spacing: 3px;
+            border-radius: 4px;
         }
         .btn:hover { 
-            background: #00ff88; 
-            color: black; 
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.8); 
+            background: #00d2ff; 
+            color: #050a1f; 
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.8); 
         }
 
         #qr-phase { display: none; }
+        
+        /* QR Code Hologram Container */
+        #qr-hologram-box {
+            position: relative;
+            display: inline-block;
+            padding: 20px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+        
+        /* Scanning Effect */
+        #qr-hologram-box::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 2px solid rgba(0, 210, 255, 0.5);
+            border-radius: 50%;
+            animation: scanRotate 4s linear infinite;
+            box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.3);
+        }
+
+        /* Scanner Line */
+        #qr-hologram-box::after {
+            content: "";
+            position: absolute;
+            top: 50%; left: 0; right: 0;
+            height: 2px;
+            background: #00d2ff;
+            box-shadow: 0 0 10px #00d2ff;
+            animation: scanMove 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes scanRotate { 100% { transform: rotate(360deg); } }
+        @keyframes scanMove { from { top: 10%; } to { top: 90%; } }
+
         #qrcode-container { 
             background: rgba(255, 255, 255, 0.9); 
             padding: 15px; 
-            display: inline-block; 
-            border-radius: 0px; /* Sharp edges */
-            margin-bottom: 20px; 
-            border: 2px solid #00ff88;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            border-radius: 4px;
+            border: 2px solid #00d2ff;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
+            position: relative;
+            z-index: 2;
         }
         
         input[type="file"] { display: none; }
         
         /* Fullscreen Button */
-        #small-fs-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: transparent; border: 1px solid #00ff88; color: #00ff88; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; opacity: 0.5; }
-        #small-fs-btn:hover { opacity: 1; background: #00ff88; color: black; }
+        #small-fs-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: transparent; border: 1px solid #00d2ff; color: #00d2ff; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; opacity: 0.5; transition: all 0.3s; }
+        #small-fs-btn:hover { opacity: 1; background: #00d2ff; color: #050a1f; box-shadow: 0 0 15px #00d2ff; }
 
         /* Launch Sequence Styles */
-        #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        .countdown-text { font-family: 'Orbitron', sans-serif; font-size: 15em; color: #fff; text-shadow: 0 0 80px #00ff88; font-weight: bold; }
+        #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        .countdown-text { font-family: 'Orbitron', sans-serif; font-size: 15em; color: #fff; text-shadow: 0 0 80px #00d2ff; font-weight: bold; }
         
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
-        @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
+        @keyframes flashAnim { 0% { background: #000; } 50% { background: #fff; } 100% { background: #000; } }
         
-        video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
+        video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: #000; }
     </style>
 </head>
 <body>
     <div class="stars"></div>
     <div class="stars2"></div>
+    <div class="shooting-stars"></div>
     
     <div id="interface">
         <div id="upload-phase">
@@ -130,8 +187,10 @@
         </div>
         <div id="qr-phase">
             <h1>Secure Link</h1>
-            <div id="qrcode-container"><div id="qrcode"></div></div>
-            <p id="status-text" style="color:#00ff88; margin-bottom:20px; letter-spacing: 2px; font-size: 0.9em;">WAITING FOR REMOTE...</p>
+            <div id="qr-hologram-box">
+                <div id="qrcode-container"><div id="qrcode"></div></div>
+            </div>
+            <p id="status-text" style="color:#00d2ff; margin-bottom:20px; letter-spacing: 2px; font-size: 0.9em; text-shadow: 0 0 5px rgba(0,210,255,0.5);">WAITING FOR REMOTE...</p>
             <button id="arm-btn" class="btn" onclick="armSystem()">ARM SYSTEM</button>
         </div>
     </div>
