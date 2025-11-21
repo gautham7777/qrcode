@@ -3,107 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mission Control // Entry</title>
+    <title>Mission Control // Select Mode</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-        
-        body { 
-            background-color: #050510; color: #00ff88; 
-            font-family: 'Share Tech Mono', monospace; 
-            height: 100vh; margin: 0; 
-            display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; 
-            overflow: hidden;
-        }
-
-        /* Star Background */
-        .stars {
-            width: 1px; height: 1px; background: transparent;
-            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF;
-            animation: animStar 100s linear infinite;
-            position: absolute; top: 0; left: 0; z-index: -1;
-        }
-        .stars:after {
-            content: " "; position: absolute; top: 2000px; width: 1px; height: 1px;
-            background: transparent;
-            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF;
-        }
+        body { background-color: #050510; color: #00ff88; font-family: 'Share Tech Mono', monospace; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        .stars { width: 1px; height: 1px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF; animation: animStar 100s linear infinite; position: absolute; top: 0; left: 0; z-index: -1; }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-
-        /* Container */
-        .container {
-            text-align: center;
-            background: rgba(0, 20, 10, 0.6);
-            backdrop-filter: blur(12px);
-            padding: 50px;
-            border: 1px solid rgba(0, 255, 136, 0.2);
-            border-radius: 20px;
-            box-shadow: 0 0 50px rgba(0, 255, 136, 0.1);
-            max-width: 400px;
-            width: 80%;
-            animation: fadeIn 1s ease;
-        }
-
-        h1 { margin: 0 0 10px 0; font-size: 32px; letter-spacing: 2px; color: white; text-shadow: 0 0 15px rgba(0,255,136,0.5); }
-        p { color: #888; font-size: 14px; margin-bottom: 40px; letter-spacing: 1px; }
-
-        /* Main Button */
-        .btn-main {
-            display: block;
-            width: 100%;
-            padding: 20px 0;
-            margin-bottom: 20px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 22px;
-            font-weight: bold;
-            color: #050510;
-            background: #00ff88;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-            transition: all 0.2s;
-            text-transform: uppercase;
-        }
-
-        .btn-main:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.8);
-            background: white;
-        }
-
-        /* Footer Link */
-        .remote-link {
-            color: #444;
-            font-size: 12px;
-            text-decoration: none;
-            border-bottom: 1px dotted #444;
-            transition: color 0.3s;
-        }
-        .remote-link:hover { color: #888; border-color: #888; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .container { text-align: center; background: rgba(0, 20, 10, 0.6); backdrop-filter: blur(12px); padding: 40px; border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 16px; box-shadow: 0 0 50px rgba(0, 255, 136, 0.1); max-width: 350px; width: 85%; }
+        h1 { margin: 0 0 30px 0; font-size: 28px; letter-spacing: 2px; color: white; border-bottom: 1px solid rgba(0,255,136,0.2); padding-bottom: 15px; }
+        .btn { display: block; width: 100%; padding: 20px 0; margin-bottom: 20px; font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: bold; border-radius: 8px; cursor: pointer; text-decoration: none; transition: all 0.2s; text-transform: uppercase; box-sizing: border-box; }
+        .btn-host { color: #050510; background: #00ff88; border: 1px solid #00ff88; }
+        .btn-host:hover { background: white; transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
+        .btn-remote { color: #ff4d4d; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; }
+        .btn-remote:hover { background: #ff4d4d; color: black; transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 77, 77, 0.6); }
     </style>
 </head>
 <body>
-
     <div class="stars"></div>
-
     <div class="container">
-        <h1>CEREMONY<br>PROTOCOL</h1>
-        <p>SECURE UPLINK v1.0</p>
-
-        <a href="host.html" class="btn-main">
-            INITIALIZE HOST
-        </a>
-        
-        <div style="margin-top: 20px;">
-            <span style="color: #444; font-size: 12px;">REMOTE ACCESS REQUIRES QR SCAN</span>
-        </div>
+        <h1>SELECT MODE</h1>
+        <a href="host.html" class="btn btn-host">HOST SCREEN</a>
+        <a href="remote.html" class="btn btn-remote">REMOTE CONTROL</a>
     </div>
-
 </body>
 </html>
