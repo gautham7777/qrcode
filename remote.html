@@ -6,6 +6,8 @@
     <title>Mission Control</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.4.2.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
         body { background-color: #050510; color: #00ff88; font-family: 'Share Tech Mono', monospace; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
@@ -36,52 +38,42 @@
         <button id="btn" onclick="trigger()" disabled>LAUNCH</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <script>
+        // --- YOUR KEYS ARE SET HERE ---
+        const pubnub = new PubNub({
+            publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
+            subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
+            userId: "remote_phone"
+        });
+        // ------------------------------
 
-        // --- CORRECTED CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAbcNbPBSnxztpnqG1jCcynCShjxukqjhs",
-            authDomain: "billy-app-efa3f.firebaseapp.com",
-            databaseURL: "https://billy-app-efa3f-default-rtdb.firebaseio.com",
-            projectId: "billy-app-efa3f",
-            storageBucket: "billy-app-efa3f.firebasestorage.app",
-            messagingSenderId: "311034808403",
-            appId: "1:311034808403:web:cfe79efa9faa68889ddea6",
-            measurementId: "G-XQ3RKKDTHN"
-        };
+        const params = new URLSearchParams(window.location.search);
+        const channelID = params.get('ch');
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('id');
-
-        if (!sessionId) {
-            document.getElementById('status').innerText = "ERROR: SCAN QR AGAIN";
+        if (channelID) {
+            // We assume connection is good because PubNub is global
+            document.getElementById('status').innerText = "/// SYSTEM ARMED ///";
+            document.getElementById('status').style.color = "#00ff88";
+            document.getElementById('status').style.textShadow = "0 0 10px #00ff88";
+            document.getElementById('status').style.animation = "none";
+            document.getElementById('btn').disabled = false;
         } else {
-            // Handshake
-            set(ref(db, 'sessions/' + sessionId), 'CONNECTED').then(() => {
-                const statusEl = document.getElementById('status');
-                statusEl.innerText = "/// SYSTEM ARMED ///";
-                statusEl.style.color = "#00ff88";
-                statusEl.style.textShadow = "0 0 10px #00ff88";
-                statusEl.style.animation = "none";
-                
-                const btn = document.getElementById('btn');
-                btn.disabled = false;
-                if(navigator.vibrate) navigator.vibrate(100);
-            });
+            document.getElementById('status').innerText = "ERROR: SCAN QR AGAIN";
         }
 
-        window.trigger = () => {
-            set(ref(db, 'sessions/' + sessionId), 'PLAY');
-            
+        function trigger() {
             const btn = document.getElementById('btn');
             btn.innerText = "LIFTOFF";
             btn.classList.add('success-state');
+            
             document.getElementById('status').innerText = "SEQUENCE INITIATED";
+            
+            // SEND THE SIGNAL
+            pubnub.publish({
+                channel: channelID,
+                message: 'GO'
+            });
+            
             if(navigator.vibrate) navigator.vibrate([100, 50, 500]);
         }
     </script>
