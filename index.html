@@ -3,39 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Portfolio - Main</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Portfolio System</title>
+    <style>
+        /* --- CSS STYLES --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Subtle Star Background using CSS gradients */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
+            background-size: 550px 550px, 350px 350px, 250px 250px; 
+            background-position: 0 0, 40 60, 130 270;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* LANDING SECTION */
+        #landing-section {
+            text-align: center;
+            transition: opacity 0.8s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+            font-weight: normal;
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        button {
+            background: transparent;
+            color: #00ff9d; /* Matrix/Sci-fi Green */
+            font-family: inherit;
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            border: 2px solid #00ff9d;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #00ff9d;
+            color: black;
+            box-shadow: 0 0 20px #00ff9d;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #555;
+            color: #555;
+            box-shadow: none;
+        }
+
+        /* QR SECTION */
+        #qr-section {
+            display: none; /* Hidden initially */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .qr-box {
+            width: 250px;
+            height: 250px;
+            border: 2px solid #00ff9d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: rgba(0, 255, 157, 0.05);
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.1);
+        }
+
+        /* Simulation of a QR code without an image file */
+        .qr-placeholder {
+            color: #00ff9d;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        /* Scanning animation line */
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #00ff9d;
+            top: 0;
+            animation: scan 2s infinite linear;
+            box-shadow: 0 0 10px #00ff9d;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; opacity: 0;}
+            10% { opacity: 1;}
+            90% { opacity: 1;}
+            100% { top: 100%; opacity: 0;}
+        }
+
+        .status {
+            margin-top: 20px;
+            color: #00ff9d;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+    </style>
 </head>
 <body>
 
     <div id="landing-section">
-        <div class="content">
-            <h1>WELCOME TO MY UNIVERSE</h1>
-            <p>Initiate launch sequence.</p>
-            <button id="launch-btn">LAUNCH EXPERIENCE</button>
-        </div>
-        
-        <div class="spaceship-container">
-            <img src="assets/spaceship.png" id="spaceship" alt="Spaceship">
-        </div>
+        <h1>INTERACTIVE PORTFOLIO SYSTEM</h1>
+        <button id="launch-btn">Initialize System</button>
     </div>
 
     <div id="qr-section">
-        <div class="qr-card">
-            <h2>SYSTEM UNLOCKED</h2>
-            <p class="sub-text">Scan to establish remote link</p>
-            
-            <div class="qr-frame">
-                <img src="assets/qrcode.png" alt="QR Code" class="qr-img">
-                <div class="scanner-line"></div>
+        <div class="qr-box">
+            <div class="qr-placeholder">
+                [ QR CODE DISPLAY ]<br>
+                <small>Scan to Connect</small>
             </div>
-            
-            <div class="status-text">
-                <span class="blink">●</span> WAITING FOR SIGNAL...
-            </div>
+            <div class="scan-line"></div>
         </div>
+        <div class="status">WAITING FOR REMOTE CONNECTION...</div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // --- JAVASCRIPT LOGIC ---
+        const launchBtn = document.getElementById('launch-btn');
+        const landingSection = document.getElementById('landing-section');
+        const qrSection = document.getElementById('qr-section');
+
+        launchBtn.addEventListener('click', () => {
+            // 1. SPAM FIX: Immediately disable button
+            launchBtn.disabled = true;
+            launchBtn.innerText = "LOADING...";
+            
+            // 2. Visual transition logic
+            landingSection.style.opacity = '0';
+
+            // 3. Wait for fade out, then switch
+            setTimeout(() => {
+                landingSection.style.display = 'none';
+                qrSection.style.display = 'flex';
+                
+                // Small delay to trigger fade in
+                setTimeout(() => {
+                    qrSection.style.opacity = '1';
+                }, 50);
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
