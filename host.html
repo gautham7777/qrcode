@@ -9,183 +9,71 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        /* Import Sci-Fi Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Rajdhani:wght@500;700&display=swap');
-
-        /* --- 1. GLOBAL COSMIC THEME --- */
-        body { 
-            background-color: #000; 
-            color: #00f3ff; /* Cyan Neon */
-            font-family: 'Rajdhani', sans-serif; 
-            height: 100vh; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            overflow: hidden; 
-            background: radial-gradient(circle at center, #0b1026 0%, #000000 90%);
-        }
-
-        /* --- 2. ANIMATED BACKGROUND STARS --- */
-        .stars { 
-            width: 3px; height: 3px; 
-            background: transparent; 
-            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 900px 100px #FFF; 
-            animation: animStar 150s linear infinite; 
-            position: absolute; top: 0; left: 0; z-index: -2; 
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        body { background-color: #050510; color: #00ff88; font-family: 'Share Tech Mono', monospace; height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .stars { width: 1px; height: 1px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; animation: animStar 100s linear infinite; position: absolute; top: 0; left: 0; z-index: -2; }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-
-        /* --- 3. THE HUD INTERFACE (Glass Panel) --- */
-        #interface { 
-            background: rgba(10, 15, 30, 0.8); 
-            backdrop-filter: blur(20px); 
-            border: 2px solid rgba(0, 243, 255, 0.3); 
-            padding: 80px; /* Massive padding for stage presence */
-            border-radius: 0px; 
-            text-align: center; 
-            z-index: 10; 
-            transition: opacity 0.5s; 
-            box-shadow: 0 0 100px rgba(0, 243, 255, 0.15);
-            position: relative;
-            min-width: 600px; /* Ensure it's wide enough */
-        }
-
-        /* Tech Corners for the HUD */
-        #interface::before { content: ''; position: absolute; top: -2px; left: -2px; width: 40px; height: 40px; border-top: 6px solid #00f3ff; border-left: 6px solid #00f3ff; }
-        #interface::after { content: ''; position: absolute; bottom: -2px; right: -2px; width: 40px; height: 40px; border-bottom: 6px solid #00f3ff; border-right: 6px solid #00f3ff; }
-
-        h1 { 
-            margin: 0 0 50px 0; 
-            font-family: 'Orbitron', sans-serif;
-            font-size: 4rem; /* HUGE TEXT */
-            letter-spacing: 10px; 
-            text-transform: uppercase; 
-            color: white; 
-            text-shadow: 0 0 30px #00f3ff;
-            border-bottom: 3px solid rgba(0, 243, 255, 0.2); 
-            padding-bottom: 30px; 
-        }
-
-        /* --- 4. MASSIVE BUTTONS --- */
-        .btn { 
-            padding: 30px 60px; 
-            font-family: 'Orbitron', sans-serif; 
-            font-size: 2rem; /* Huge button text */
-            color: #00f3ff; 
-            background: rgba(0, 243, 255, 0.05); 
-            border: 3px solid #00f3ff; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            width: 100%; 
-            transition: 0.3s;
-            letter-spacing: 4px;
-            margin-top: 30px;
-        }
-        .btn:hover { 
-            background: #00f3ff; 
-            color: black; 
-            box-shadow: 0 0 60px rgba(0, 243, 255, 0.8); 
-        }
-
-        /* --- 5. QR CODE STYLING (Strict Containment) --- */
+        #interface { background: rgba(0, 20, 10, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0, 255, 136, 0.3); padding: 60px; border-radius: 12px; text-align: center; z-index: 10; transition: opacity 0.5s; width: 100%; max-width: 600px; }
+        h1 { margin: 0 0 40px 0; font-size: 24px; letter-spacing: 4px; text-transform: uppercase; color: white; border-bottom: 1px solid rgba(0,255,136,0.2); padding-bottom: 20px; }
+        .btn { padding: 20px 40px; font-family: 'Share Tech Mono', monospace; font-size: 20px; color: #00ff88; background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; cursor: pointer; text-transform: uppercase; width: 100%; }
+        .btn:hover { background: #00ff88; color: black; box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
         #qr-phase { display: none; }
         
+        /* --- CSS CHANGE: Centering the QR Container --- */
         #qrcode-container { 
             background: white; 
             padding: 20px; 
-            display: inline-block; 
-            margin-bottom: 30px; 
-            border: 5px solid #00f3ff;
-            box-shadow: 0 0 50px rgba(0, 243, 255, 0.3);
+            display: block; /* Changed from inline-block */
+            width: fit-content; /* Only as wide as needed */
+            margin: 0 auto 20px auto; /* Centers horizontally */
+            border-radius: 10px; 
         }
+        /* ---------------------------------------------- */
 
-        /* Force QR image to be BIG and behave */
-        #qrcode img {
-            width: 400px !important;  /* Fixed large size */
-            height: 400px !important;
-            display: block;
-        }
-        
-        /* NUCLEAR OPTION: Hide any ghost images floating on the body */
-        body > img:not(#mainImage) { display: none !important; }
-
-        /* Status Text */
-        #status-text {
-            color: #00f3ff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            letter-spacing: 4px;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 50% { opacity: 0.5; } }
-
-        /* --- 6. HIDDEN UTILITIES --- */
         input[type="file"] { display: none; }
-        
-        /* Fullscreen Button (Subtle corner toggle) */
-        #small-fs-btn { 
-            position: fixed; bottom: 30px; right: 30px; 
-            width: 60px; height: 60px; 
-            background: transparent; 
-            border: 2px solid #00f3ff; 
-            color: #00f3ff; 
-            font-size: 30px; 
-            display: flex; justify-content: center; align-items: center; 
-            cursor: pointer; z-index: 100; 
-            opacity: 0.3; transition: 0.3s;
-            border-radius: 50%;
-        }
-        #small-fs-btn:hover { opacity: 1; background: rgba(0, 243, 255, 0.2); box-shadow: 0 0 20px #00f3ff; }
-
-        /* --- 7. LAUNCH OVERLAY --- */
+        #small-fs-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; color: #00ff88; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; }
         #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        .countdown-text { font-family: 'Orbitron'; font-size: 25em; color: white; text-shadow: 0 0 150px #00f3ff; }
+        .countdown-text { font-size: 10em; color: #00ff88; text-shadow: 0 0 50px #00ff88; }
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
-        
         video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
     </style>
 </head>
 <body>
     <div class="stars"></div>
-    
     <div id="interface">
         <div id="upload-phase">
-            <h1>System Uplink</h1>
-            <button class="btn" onclick="document.getElementById('fileInput').click()">[ LOAD PAYLOAD ]</button>
+            <h1>/// Data Uplink ///</h1>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">[ UPLOAD PAYLOAD ]</button>
             <input type="file" id="fileInput" accept="video/*,image/*" onchange="handleFile(this)">
         </div>
-        
         <div id="qr-phase">
-            <h1>Awaiting Signal</h1>
-            <div id="qrcode-container">
-                <div id="qrcode"></div>
+            <h1>/// Secure Link ///</h1>
+            <div id="qrcode-container"><div id="qrcode"></div></div>
+            <p id="status-text" style="color:#aaa; margin-bottom:20px;">WAITING FOR SIGNAL...</p>
             </div>
-            <p id="status-text">IGNITE THE HORIZON</p>
-            <button id="arm-btn" class="btn" onclick="armSystem()">HIDE UI</button>
-        </div>
     </div>
     
-    <button id="small-fs-btn" onclick="toggleFullscreen()">⛶</button>
-    
+    <button id="small-fs-btn" class="btn" onclick="toggleFullscreen()">⛶</button>
     <div id="launch-overlay"><div id="countdown" class="countdown-text"></div></div>
     <video id="mainVideo" playsinline></video>
     <img id="mainImage">
 
     <script>
-        // --- YOUR ORIGINAL LOGIC (UNTOUCHED) ---
+        // --- YOUR KEYS ARE SET HERE ---
         const pubnub = new PubNub({
             publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
             subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
             userId: "host_laptop"
         });
+        // ------------------------------
 
+        // Random Channel ID so you don't clash with others
         const channelID = "ceremony_" + Math.floor(Math.random() * 99999);
         let mediaType = "";
         let audioCtx; 
 
+        // --- AUDIO & FULLSCREEN ---
         function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         function playBeep() {
             if (!audioCtx) initAudio();
@@ -208,8 +96,10 @@
             else if (document.exitFullscreen) document.exitFullscreen();
         }
 
+        // --- LISTEN FOR SIGNAL ---
         pubnub.subscribe({ channels: [channelID] });
         
+        // IMPORTANT: This listener waits for the 'GO' signal
         pubnub.addListener({
             message: function(m) {
                 if (m.message === 'GO') startLaunchSequence();
@@ -226,6 +116,7 @@
                 mediaType = 'video';
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
+                // Infinite Loop Logic
                 vid.onended = function() {
                     vid.style.display = 'none';
                     const overlay = document.getElementById('launch-overlay');
@@ -241,28 +132,21 @@
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'block';
             
-            // HIDE FS BUTTON ON UPLOAD
-            document.getElementById('small-fs-btn').style.display = 'none';
-
+            // Create QR Code with Channel ID
             const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
             const triggerUrl = `${baseUrl}/remote.html?ch=${channelID}`;
-            
-            const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = "";
-            
-            // Wait 50ms to ensure DOM is ready
-            setTimeout(() => {
-                new QRCode(qrContainer, { text: triggerUrl, width: 400, height: 400 });
-            }, 50);
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 200, height: 200 });
         }
 
+        // NOTE: This function is no longer called by a button, 
+        // but I left it in case you want to call it automatically later.
         function armSystem() {
             toggleFullscreen();
             const ui = document.getElementById('interface');
             ui.style.opacity = '0';
-            // Ensure FS button is hidden
-            document.getElementById('small-fs-btn').style.display = 'none';
-            setTimeout(() => { ui.style.display = 'none'; }, 500);
+            document.getElementById('small-fs-btn').style.opacity = '0';
+            setTimeout(() => { ui.style.display = 'none'; document.getElementById('small-fs-btn').style.display = 'none';}, 500);
             document.body.style.cursor = 'none';
         }
 
