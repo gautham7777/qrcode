@@ -4,34 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remote Control</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- CSS STYLES --- */
+        body {
+            background-color: #000000;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header {
+            color: #00ff9d;
+            border-bottom: 1px solid #00ff9d;
+            padding-bottom: 5px;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+        }
+
+        .controller-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 15px;
+        }
+
+        .btn {
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 10px;
+            color: #00ff9d;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            background: #00ff9d;
+            color: #000;
+            border-color: #00ff9d;
+            box-shadow: 0 0 15px #00ff9d;
+            transform: scale(0.95);
+        }
+
+        /* Positioning buttons in grid */
+        .up { grid-column: 2; grid-row: 1; }
+        .left { grid-column: 1; grid-row: 2; }
+        .right { grid-column: 3; grid-row: 2; }
+        .down { grid-column: 2; grid-row: 3; }
+        
+        .ok { 
+            grid-column: 2; 
+            grid-row: 2;
+            font-size: 1rem; 
+            font-weight: bold;
+            border-radius: 50%;
+            border-color: #00ff9d;
+            background: rgba(0, 255, 157, 0.1);
+        }
+
+        .status-indicator {
+            margin-top: 50px;
+            font-size: 0.7rem;
+            color: #555;
+            letter-spacing: 3px;
+        }
+    </style>
 </head>
-<body class="remote-body">
+<body>
 
-    <div class="remote-container">
-        <div class="hud-header">
-            <div class="signal-strength">|||||</div>
-            <h3>COMMAND MODULE</h3>
-        </div>
+    <div class="header">SYSTEM LINKED</div>
 
-        <div class="controller-pad">
-            <div class="d-pad">
-                <div></div>
-                <button class="btn up">▲</button>
-                <div></div>
-                
-                <button class="btn left">◀</button>
-                <button class="btn select">OK</button>
-                <button class="btn right">▶</button>
-                
-                <div></div>
-                <button class="btn down">▼</button>
-                <div></div>
-            </div>
-        </div>
-
-        <p class="remote-footer">CONNECTED</p>
+    <div class="controller-grid">
+        <div class="btn up">▲</div>
+        <div class="btn left">◀</div>
+        <div class="btn ok">OK</div>
+        <div class="btn right">▶</div>
+        <div class="btn down">▼</div>
     </div>
 
-    </body>
+    <div class="status-indicator">SIGNAL STABLE</div>
+
+    <script>
+        // You can add your socket.io or fetch logic here later
+        // For now, it just handles visual clicks
+        const buttons = document.querySelectorAll('.btn');
+        
+        buttons.forEach(btn => {
+            btn.addEventListener('touchstart', () => {
+                // Mobile touch feedback
+            }, {passive: true});
+        });
+    </script>
+</body>
 </html>
