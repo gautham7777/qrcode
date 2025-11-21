@@ -2,125 +2,150 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Controller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mission Control</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.4.2.min.js"></script>
+    
     <style>
-        /* --- COCKPIT CSS --- */
-        :root {
-            --neon-blue: #00f3ff;
-            --bg-color: #080a10;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: white;
-            font-family: 'Courier New', Courier, monospace;
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            /* Subtle grid background */
-            background-image: linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-        }
-
-        .hud-panel {
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            padding: 30px;
-            border-radius: 30px;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(5px);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.05);
-            width: 80%;
-            max-width: 350px;
-            text-align: center;
-        }
-
-        h2 {
-            color: var(--neon-blue);
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 30px;
-            font-size: 1.2rem;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
-        }
-
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 80px);
-            gap: 15px;
-            justify-items: center;
-            align-items: center;
-        }
-
-        .btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 15px;
-            background: rgba(10, 20, 40, 0.6);
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            font-size: 1.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
-            transition: all 0.1s;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .btn:active {
-            background: var(--neon-blue);
-            color: #000;
-            box-shadow: 0 0 30px var(--neon-blue);
-            transform: scale(0.9);
-        }
-
-        /* Grid Positions */
-        .up { grid-column: 2; grid-row: 1; }
-        .left { grid-column: 1; grid-row: 2; }
-        .right { grid-column: 3; grid-row: 2; }
-        .down { grid-column: 2; grid-row: 3; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&display=swap');
         
-        .select { 
-            grid-column: 2; grid-row: 2;
-            border-radius: 50%;
-            font-size: 0.9rem;
-            font-weight: bold;
-            background: rgba(0, 243, 255, 0.1);
+        body { 
+            background-color: #050505; 
+            color: #fff; 
+            font-family: 'Share Tech Mono', monospace; 
+            height: 100vh; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
         }
 
-        .footer {
-            margin-top: 30px;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.3);
+        /* Grid Background */
+        body::before {
+            content: "";
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+        }
+
+        #header { 
+            position: absolute; top: 40px; 
+            text-align: center; width: 100%; 
+            letter-spacing: 4px; 
+            text-transform: uppercase; 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px; 
+            color: #ff4d4d; 
+            text-shadow: 0 0 10px #ff4d4d;
+        }
+
+        #status { 
+            margin-bottom: 60px; 
+            color: #ff3333; 
+            font-size: 16px; 
+            letter-spacing: 2px; 
+            text-transform: uppercase;
+            animation: blink 1s infinite; 
+        }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        
+        #btn-container { position: relative; width: 300px; height: 300px; display: flex; justify-content: center; align-items: center; }
+        
+        /* Rotating Rings */
+        .ring { position: absolute; border-radius: 50%; border: 1px solid rgba(255, 50, 50, 0.3); width: 100%; height: 100%; animation: spin 4s linear infinite; border-left-color: #ff0000; border-right-color: transparent; }
+        .ring:nth-child(2) { width: 120%; height: 120%; border: 1px dashed rgba(255, 255, 255, 0.1); animation-direction: reverse; animation-duration: 10s; border: 1px dashed rgba(255,50,50, 0.2); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        /* THE BUTTON */
+        button { 
+            width: 240px; height: 240px; 
+            border-radius: 50%; 
+            border: none;
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 36px; 
             letter-spacing: 2px;
+            color: white; 
+            background: radial-gradient(circle at 30% 30%, #ff5555, #aa0000); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 50px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(0,0,0,0.5);
+            cursor: pointer; 
+            text-transform: uppercase; 
+            z-index: 10; 
+            transition: all 0.2s; 
+            position: relative;
+        }
+        
+        button::after {
+            content: ""; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border-radius: 50%; border: 2px solid rgba(255,255,255,0.1);
         }
 
+        button:active { transform: scale(0.95); background: #990000; box-shadow: 0 0 80px #ff0000; }
+        
+        button:disabled { 
+            background: #1a1a1a; 
+            color: #555; 
+            box-shadow: none; 
+            cursor: not-allowed; 
+        }
+        
+        .success-state { 
+            background: radial-gradient(circle at 30% 30%, #00ff88, #004422) !important; 
+            box-shadow: 0 0 80px #00ff88 !important; 
+            color: #fff !important; 
+            text-shadow: 0 0 10px black;
+        }
     </style>
 </head>
 <body>
-
-    <div class="hud-panel">
-        <h2>Flight Deck</h2>
-
-        <div class="controls">
-            <div class="btn up">▲</div>
-            <div class="btn left">◀</div>
-            <div class="btn select">ENGAGE</div>
-            <div class="btn right">▶</div>
-            <div class="btn down">▼</div>
-        </div>
-
-        <div class="footer">SYSTEM: ONLINE</div>
+    <div id="header">/// COMMAND MODULE ///</div>
+    <div id="status">WAITING FOR UPLINK...</div>
+    <div id="btn-container">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <button id="btn" onclick="trigger()" disabled>LAUNCH</button>
     </div>
 
+    <script>
+        // --- EXACT LOGIC ---
+        const pubnub = new PubNub({
+            publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
+            subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
+            userId: "remote_phone"
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        const channelID = params.get('ch');
+
+        if (channelID) {
+            document.getElementById('status').innerText = "/// READY TO FIRE ///";
+            document.getElementById('status').style.color = "#ff4d4d";
+            document.getElementById('status').style.textShadow = "0 0 10px #ff4d4d";
+            document.getElementById('status').style.animation = "none";
+            document.getElementById('btn').disabled = false;
+        } else {
+            document.getElementById('status').innerText = "ERROR: SCAN QR AGAIN";
+        }
+
+        function trigger() {
+            const btn = document.getElementById('btn');
+            btn.innerText = "LIFTOFF";
+            btn.classList.add('success-state');
+            
+            document.getElementById('status').innerText = "SIGNAL SENT";
+            document.getElementById('status').style.color = "#00ff88";
+            
+            pubnub.publish({
+                channel: channelID,
+                message: 'GO'
+            });
+            
+            if(navigator.vibrate) navigator.vibrate([100, 50, 500]);
+        }
+    </script>
 </body>
 </html>
