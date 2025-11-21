@@ -3,317 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <title>Mission Control Host</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
-    
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.4.2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Rajdhani:wght@500;700&display=swap');
         
+        /* --- GLOBAL SETUP --- */
         body { 
-            background-color: #00000a; 
-            color: #00d2ff; 
-            font-family: 'Share Tech Mono', monospace; 
-            height: 100vh; 
+            background-color: #000; 
             margin: 0; 
+            height: 100vh; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             overflow: hidden; 
-            /* Deep Blue Space Gradient */
-            background: radial-gradient(circle at center, #050a1f 0%, #000000 100%);
+            font-family: 'Rajdhani', sans-serif;
+            color: #00f3ff;
         }
 
-        /* SCANLINE OVERLAY */
-        body::after {
-            content: " ";
-            display: block;
+        /* --- BACKGROUND FX --- */
+        .nebula {
             position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(0, 10, 20, 0.1) 50%, rgba(0, 0, 0, 0.25) 50%);
-            z-index: 2;
-            background-size: 100% 2px;
-            pointer-events: none;
-            opacity: 0.5;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, #001a33 0%, #000000 80%);
+            z-index: -2;
         }
-
-        /* STARS ANIMATION */
-        .stars, .stars2, .shooting-stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .stars { background: transparent; box-shadow: 124px 235px #fff, 20px 400px #fff, 500px 120px #fff, 50px 50px #fff; animation: animStar 150s linear infinite; opacity: 0.7; z-index: -1; }
-        .stars2 { background: transparent; box-shadow: 100px 200px #aaf, 400px 500px #aaf, 300px 100px #aaf; animation: animStar 200s linear infinite; opacity: 0.4; z-index: -1; }
-        .shooting-stars::before {
-            content: "";
+        .grid {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 2px;
-            height: 2px;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%);
-            box-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
-            animation: shootingStar 6s linear infinite;
-            opacity: 0;
+            width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
         }
 
-        @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-        @keyframes shootingStar {
-            0% { transform: translate(-200px, -200px) rotate(-45deg); opacity: 1; width: 100px; }
-            20% { transform: translate(calc(100vw + 200px), calc(100vh + 200px)) rotate(-45deg); opacity: 0; width: 2px; }
-            100% { transform: translate(calc(100vw + 200px), calc(100vh + 200px)) rotate(-45deg); opacity: 0; width: 2px; }
-        }
-
-        /* MAIN INTERFACE CARD */
-        #interface { 
-            background: rgba(5, 15, 30, 0.6); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(0, 210, 255, 0.4); 
-            padding: 60px; 
-            border-radius: 8px; 
-            text-align: center; 
-            z-index: 10; 
-            box-shadow: 0 0 50px rgba(0, 210, 255, 0.15);
+        /* --- UI CONTAINER --- */
+        #interface {
             position: relative;
-            width: 420px;
+            text-align: center;
+            z-index: 10;
         }
 
-        /* Tech Corners */
-        #interface::before { content: ''; position: absolute; top: -4px; left: -4px; width: 40px; height: 40px; border-top: 2px solid #00d2ff; border-left: 2px solid #00d2ff; border-radius: 8px 0 0 0; }
-        #interface::after { content: ''; position: absolute; bottom: -4px; right: -4px; width: 40px; height: 40px; border-bottom: 2px solid #00d2ff; border-right: 2px solid #00d2ff; border-radius: 0 0 8px 0; }
-
-        h1 { 
-            margin: 0 0 40px 0; 
+        h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 30px; 
-            letter-spacing: 4px; 
-            text-transform: uppercase; 
-            color: #e0f7ff; 
-            text-shadow: 0 0 20px #00d2ff;
-            border-bottom: 2px solid rgba(0, 210, 255, 0.3); 
-            padding-bottom: 20px; 
+            font-size: 3rem;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+            background: linear-gradient(to bottom, #fff, #00f3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .btn { 
-            padding: 20px 40px; 
-            font-family: 'Share Tech Mono', monospace; 
-            font-size: 20px; 
-            color: #00d2ff; 
-            background: rgba(0, 30, 50, 0.4); 
-            border: 1px solid #00d2ff; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            width: 100%; 
-            transition: all 0.3s;
-            letter-spacing: 3px;
-            border-radius: 4px;
-        }
-        .btn:hover { 
-            background: #00d2ff; 
-            color: #050a1f; 
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.8); 
-        }
-
+        /* --- THE QR HUD --- */
         #qr-phase { display: none; }
-        
-        /* QR Code Hologram Container */
-        #qr-hologram-box {
+
+        .scanner-frame {
             position: relative;
-            display: inline-block;
             padding: 20px;
-            border-radius: 50%;
-            margin-bottom: 20px;
-        }
-        
-        /* Scanning Effect */
-        #qr-hologram-box::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border: 2px solid rgba(0, 210, 255, 0.5);
-            border-radius: 50%;
-            animation: scanRotate 4s linear infinite;
-            box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.3);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            background: rgba(0, 10, 20, 0.8);
+            display: inline-block;
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
         }
 
-        /* Scanner Line */
-        #qr-hologram-box::after {
-            content: "";
+        /* Animated Corners */
+        .corner {
             position: absolute;
-            top: 50%; left: 0; right: 0;
-            height: 2px;
-            background: #00d2ff;
-            box-shadow: 0 0 10px #00d2ff;
-            animation: scanMove 2s ease-in-out infinite alternate;
+            width: 30px; height: 30px;
+            border: 3px solid #00f3ff;
+            transition: all 0.3s;
         }
-        
-        @keyframes scanRotate { 100% { transform: rotate(360deg); } }
-        @keyframes scanMove { from { top: 10%; } to { top: 90%; } }
+        .tl { top: -5px; left: -5px; border-right: none; border-bottom: none; }
+        .tr { top: -5px; right: -5px; border-left: none; border-bottom: none; }
+        .bl { bottom: -5px; left: -5px; border-right: none; border-top: none; }
+        .br { bottom: -5px; right: -5px; border-left: none; border-top: none; }
 
-        #qrcode-container { 
-            background: rgba(255, 255, 255, 0.9); 
-            padding: 15px; 
-            border-radius: 4px;
-            border: 2px solid #00d2ff;
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
-            position: relative;
-            z-index: 2;
+        /* The Laser Scanner */
+        .laser {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: #00f3ff;
+            box-shadow: 0 0 20px #00f3ff, 0 0 10px #fff;
+            animation: scan 2.5s ease-in-out infinite;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        #qrcode-container {
+            background: white;
+            padding: 10px;
+            border: 2px solid #00f3ff;
+        }
+
+        .status-text {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 50% { opacity: 0.3; } }
+
+        /* --- BUTTONS --- */
+        .btn {
+            background: transparent;
+            border: 1px solid #00f3ff;
+            color: #00f3ff;
+            padding: 15px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background: #00f3ff;
+            color: black;
+            box-shadow: 0 0 30px #00f3ff;
         }
         
         input[type="file"] { display: none; }
-        
-        /* Fullscreen Button */
-        #small-fs-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: transparent; border: 1px solid #00d2ff; color: #00d2ff; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; opacity: 0.5; transition: all 0.3s; }
-        #small-fs-btn:hover { opacity: 1; background: #00d2ff; color: #050a1f; box-shadow: 0 0 15px #00d2ff; }
 
-        /* Launch Sequence Styles */
-        #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        .countdown-text { font-family: 'Orbitron', sans-serif; font-size: 15em; color: #fff; text-shadow: 0 0 80px #00d2ff; font-weight: bold; }
-        
-        .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
-        @keyframes flashAnim { 0% { background: #000; } 50% { background: #fff; } 100% { background: #000; } }
-        
-        video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: #000; }
+        /* --- HIDDEN MEDIA LAYERS --- */
+        #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; }
+        .countdown-text { font-family: 'Orbitron', sans-serif; font-size: 15rem; color: white; text-shadow: 0 0 100px #00f3ff; }
+        video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
+
     </style>
 </head>
 <body>
-    <div class="stars"></div>
-    <div class="stars2"></div>
-    <div class="shooting-stars"></div>
-    
+
+    <div class="nebula"></div>
+    <div class="grid"></div>
+
     <div id="interface">
         <div id="upload-phase">
             <h1>System Uplink</h1>
-            <button class="btn" onclick="document.getElementById('fileInput').click()">[ INITIALIZE PAYLOAD ]</button>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">[ LOAD PAYLOAD ]</button>
             <input type="file" id="fileInput" accept="video/*,image/*" onchange="handleFile(this)">
         </div>
+
         <div id="qr-phase">
-            <h1>Secure Link</h1>
-            <div id="qr-hologram-box">
-                <div id="qrcode-container"><div id="qrcode"></div></div>
+            <h1>Awaiting Signal</h1>
+            
+            <div class="scanner-frame">
+                <div class="corner tl"></div><div class="corner tr"></div>
+                <div class="corner bl"></div><div class="corner br"></div>
+                <div class="laser"></div>
+                
+                <div id="qrcode-container">
+                    <div id="qrcode"></div>
+                </div>
             </div>
-            <p id="status-text" style="color:#00d2ff; margin-bottom:20px; letter-spacing: 2px; font-size: 0.9em; text-shadow: 0 0 5px rgba(0,210,255,0.5);">WAITING FOR REMOTE...</p>
-            <button id="arm-btn" class="btn" onclick="armSystem()">ARM SYSTEM</button>
+
+            <div class="status-text">SCAN TO CONNECT REMOTE</div>
+            <button class="btn" onclick="armSystem()" style="font-size: 0.8rem; margin-top: 30px; opacity: 0.7;">HIDE UI</button>
         </div>
     </div>
-    
-    <button id="small-fs-btn" class="btn" onclick="toggleFullscreen()">⛶</button>
+
     <div id="launch-overlay"><div id="countdown" class="countdown-text"></div></div>
     <video id="mainVideo" playsinline></video>
     <img id="mainImage">
 
     <script>
-        // --- EXACT LOGIC FROM YOUR WORKING VERSION ---
+        // --- LOGIC ---
         const pubnub = new PubNub({
             publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
             subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
-            userId: "host_laptop"
+            userId: "host"
         });
+        const channelID = "launch_" + Math.floor(Math.random()*9999);
+        let audioCtx;
 
-        const channelID = "ceremony_" + Math.floor(Math.random() * 99999);
-        let mediaType = "";
-        let audioCtx; 
-
-        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         
-        function playBeep() {
-            if (!audioCtx) initAudio();
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime+0.1);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3);
-            osc.start(); osc.stop(audioCtx.currentTime+0.3);
+        // Sound FX
+        function playTone(freq, type, dur) {
+            if(!audioCtx) initAudio();
+            const osc = audioCtx.createOscillator(); 
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + dur);
         }
-        
-        function playLaunchSound() {
-            if (!audioCtx) initAudio();
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime+1);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+1.5);
-            osc.start(); osc.stop(audioCtx.currentTime+1.5);
-        }
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err=>{});
-            else if (document.exitFullscreen) document.exitFullscreen();
-        }
-
-        pubnub.subscribe({ channels: [channelID] });
-        
-        pubnub.addListener({
-            message: function(m) {
-                if (m.message === 'GO') startLaunchSequence();
-            }
-        });
 
         function handleFile(input) {
-            initAudio();
             const file = input.files[0];
-            if (!file) return;
+            if(!file) return;
             const url = URL.createObjectURL(file);
-
-            if (file.type.startsWith('video')) {
-                mediaType = 'video';
+            
+            if(file.type.startsWith('video')) {
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
-                vid.onended = function() {
-                    vid.style.display = 'none';
-                    const overlay = document.getElementById('launch-overlay');
-                    overlay.classList.remove('launch-flash');
-                    overlay.style.display = 'flex';
-                    setTimeout(() => { overlay.style.display = 'none'; vid.style.display = 'block'; vid.currentTime = 0; vid.play(); }, 500);
+                vid.onended = () => { 
+                    vid.style.display = 'none'; 
+                    document.getElementById('launch-overlay').style.display='flex'; 
+                    setTimeout(() => { document.getElementById('launch-overlay').style.display='none'; vid.style.display='block'; vid.play(); }, 500); 
                 };
+                window.mediaType = 'video';
             } else {
-                mediaType = 'image';
                 document.getElementById('mainImage').src = url;
+                window.mediaType = 'image';
             }
 
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'block';
             
-            const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            const triggerUrl = `${baseUrl}/remote.html?ch=${channelID}`;
+            // Generate QR
+            const link = window.location.href.replace('host.html', '') + 'remote.html?ch=' + channelID;
             document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 200, height: 200 });
+            new QRCode(document.getElementById("qrcode"), { text: link, width: 200, height: 200 });
+
+            // Listen for GO
+            pubnub.subscribe({ channels: [channelID] });
+            pubnub.addListener({ message: (m) => { if(m.message === 'GO') launch(); } });
         }
 
         function armSystem() {
-            toggleFullscreen();
-            const ui = document.getElementById('interface');
-            ui.style.opacity = '0';
-            document.getElementById('small-fs-btn').style.opacity = '0';
-            setTimeout(() => { ui.style.display = 'none'; document.getElementById('small-fs-btn').style.display = 'none';}, 500);
-            document.body.style.cursor = 'none';
+            document.getElementById('interface').style.opacity = '0';
+            document.documentElement.requestFullscreen().catch(()=>{});
         }
 
-        function startLaunchSequence() {
+        function launch() {
             document.getElementById('interface').style.display = 'none';
-            document.getElementById('small-fs-btn').style.display = 'none';
-            document.body.style.cursor = 'none';
-            
             const overlay = document.getElementById('launch-overlay');
-            const countdown = document.getElementById('countdown');
+            const count = document.getElementById('countdown');
             overlay.style.display = 'flex';
             
-            let count = 3;
-            countdown.innerText = count;
-            playBeep();
+            let num = 3;
+            count.innerText = num;
+            playTone(600, 'sine', 0.5);
 
-            const timer = setInterval(() => {
-                count--;
-                if (count > 0) { countdown.innerText = count; playBeep(); }
-                else if (count === 0) { countdown.innerText = "LAUNCH"; playLaunchSound(); }
-                else {
+            let timer = setInterval(() => {
+                num--;
+                if(num > 0) {
+                    count.innerText = num;
+                    playTone(600, 'sine', 0.5);
+                } else {
                     clearInterval(timer);
-                    overlay.classList.add('launch-flash');
+                    count.innerText = "";
+                    playTone(100, 'sawtooth', 2.0); // Boom
+                    overlay.style.background = 'white'; // Flash
                     setTimeout(() => {
                         overlay.style.display = 'none';
-                        if (mediaType === 'video') {
-                            const vid = document.getElementById('mainVideo');
-                            vid.style.display = 'block'; vid.currentTime = 0; vid.play();
+                        overlay.style.background = 'black';
+                        if(window.mediaType === 'video') {
+                            const v = document.getElementById('mainVideo');
+                            v.style.display='block'; v.currentTime=0; v.play();
                         } else {
-                            document.getElementById('mainImage').style.display = 'block';
+                            document.getElementById('mainImage').style.display='block';
                         }
-                    }, 500);
+                    }, 100);
                 }
             }, 1000);
         }
