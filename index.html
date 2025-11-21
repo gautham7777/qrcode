@@ -9,7 +9,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&display=swap');
         
         body { 
-            background-color: #050510; 
+            background-color: #00000a; 
             color: #fff; 
             font-family: 'Share Tech Mono', monospace; 
             height: 100vh; 
@@ -19,81 +19,90 @@
             justify-content: center; 
             align-items: center; 
             overflow: hidden; 
-            background: radial-gradient(circle at bottom, #1a0b2e 0%, #000000 100%);
+            background: radial-gradient(circle at bottom, #050a1f 0%, #000000 100%);
         }
         
-        .stars { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(white 1px, transparent 1px); background-size: 50px 50px; opacity: 0.2; z-index: -1; }
+        /* Blue Starfield */
+        .stars { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(rgba(0, 210, 255, 0.8) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.3; z-index: -1; animation: starMove 100s linear infinite; }
+        @keyframes starMove { from { transform: translateY(0); } to { transform: translateY(-100vh); } }
 
         .container { 
             text-align: center; 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(20px); 
-            padding: 50px; 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 20px; 
-            box-shadow: 0 0 60px rgba(138, 43, 226, 0.2); 
-            max-width: 350px; 
+            background: rgba(0, 30, 60, 0.3); 
+            backdrop-filter: blur(25px); 
+            padding: 60px; 
+            border: 1px solid rgba(0, 210, 255, 0.3); 
+            border-radius: 12px; 
+            box-shadow: 0 0 80px rgba(0, 210, 255, 0.2), inset 0 0 30px rgba(0, 210, 255, 0.1); 
+            max-width: 380px; 
             width: 85%; 
             position: relative;
         }
+        
+        /* Corner Accents */
+        .container::before { content: ""; position: absolute; top: -2px; left: -2px; width: 30px; height: 30px; border-top: 3px solid #00d2ff; border-left: 3px solid #00d2ff; border-radius: 8px 0 0 0; }
+        .container::after { content: ""; position: absolute; bottom: -2px; right: -2px; width: 30px; height: 30px; border-bottom: 3px solid #00d2ff; border-right: 3px solid #00d2ff; border-radius: 0 0 8px 0; }
 
         h1 { 
-            margin: 0 0 40px 0; 
+            margin: 0 0 50px 0; 
             font-family: 'Orbitron', sans-serif;
-            font-size: 24px; 
-            letter-spacing: 4px; 
-            color: white; 
+            font-size: 26px; 
+            letter-spacing: 6px; 
+            color: #e0f7ff; 
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            text-shadow: 0 0 25px rgba(0, 210, 255, 0.7);
+            border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+            padding-bottom: 20px;
         }
 
+        /* Futuristic Blue Button */
         .btn { 
             display: block; 
             width: 100%; 
             padding: 25px 0; 
-            margin-bottom: 20px; 
             font-family: 'Orbitron', sans-serif; 
-            font-size: 18px; 
-            letter-spacing: 2px;
-            border-radius: 10px; 
+            font-size: 20px; 
+            letter-spacing: 4px;
+            color: #00d2ff; 
+            background: linear-gradient(45deg, rgba(0, 30, 60, 0.6), rgba(0, 50, 100, 0.6));
+            border: 2px solid #00d2ff;
+            border-radius: 6px; 
             cursor: pointer; 
             text-decoration: none; 
-            transition: all 0.3s; 
+            transition: all 0.3s ease-in-out; 
             text-transform: uppercase; 
             box-sizing: border-box; 
             position: relative;
             overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+            clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
+        }
+        
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.4), transparent);
+            transition: 0.5s;
         }
 
-        .btn-host { 
-            color: #00ff88; 
-            background: rgba(0, 255, 136, 0.05); 
-            border: 1px solid #00ff88; 
+        .btn:hover { 
+            background: rgba(0, 210, 255, 0.1); 
+            color: #fff; 
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.6); 
+            text-shadow: 0 0 10px #00d2ff;
         }
-        .btn-host:hover { 
-            background: #00ff88; 
-            color: black; 
-            box-shadow: 0 0 40px #00ff88; 
-        }
-
-        .btn-remote { 
-            color: #ff4d4d; 
-            background: rgba(255, 77, 77, 0.05); 
-            border: 1px solid #ff4d4d; 
-        }
-        .btn-remote:hover { 
-            background: #ff4d4d; 
-            color: black; 
-            box-shadow: 0 0 40px #ff4d4d; 
+        
+        .btn:hover::before {
+            left: 100%;
         }
     </style>
 </head>
 <body>
     <div class="stars"></div>
     <div class="container">
-        <h1>Select Module</h1>
-        <a href="host.html" class="btn btn-host">Host Screen</a>
-        <a href="remote.html" class="btn btn-remote">Remote Control</a>
+        <h1>INITIATE SEQUENCE</h1>
+        <a href="host.html" class="btn">HOST SCREEN</a>
     </div>
 </body>
 </html>
