@@ -9,12 +9,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
+        /* 1. IMPORT SCI-FI FONT */
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Rajdhani:wght@500;700&display=swap');
         
-        /* --- GLOBAL THEME --- */
+        /* 2. DEEP SPACE BACKGROUND */
         body { 
             background-color: #000; 
-            color: #00ff88; 
+            color: #00ff88; /* Neon Green */
             font-family: 'Rajdhani', sans-serif; 
             height: 100vh; 
             margin: 0; 
@@ -25,17 +26,17 @@
             background: radial-gradient(circle at center, #05100a 0%, #000000 90%);
         }
 
-        /* Stars */
+        /* Animated Stars */
         .stars { 
             width: 2px; height: 2px; 
             background: transparent; 
-            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 800px 100px #FFF; 
+            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; 
             animation: animStar 150s linear infinite; 
             position: absolute; top: 0; left: 0; z-index: -2; 
         }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
 
-        /* Grid */
+        /* Cyber Grid Overlay */
         .grid {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: linear-gradient(rgba(0, 255, 136, 0.05) 1px, transparent 1px),
@@ -44,7 +45,7 @@
             z-index: -1;
         }
 
-        /* --- INTERFACE BOX --- */
+        /* 3. MAIN INTERFACE BOX (HUD STYLE) */
         #interface { 
             background: rgba(0, 20, 10, 0.85); 
             backdrop-filter: blur(15px); 
@@ -72,7 +73,6 @@
 
         h1 { 
             margin: 0 0 40px 0; 
-            font-family: 'Orbitron', sans-serif;
             font-size: 3rem; 
             letter-spacing: 8px; 
             text-transform: uppercase; 
@@ -82,7 +82,7 @@
             padding-bottom: 30px; 
         }
 
-        /* --- BUTTONS --- */
+        /* 4. BUTTONS */
         .btn { 
             padding: 25px 50px; 
             font-family: 'Orbitron', sans-serif; 
@@ -103,19 +103,17 @@
             box-shadow: 0 0 50px rgba(0, 255, 136, 0.8); 
         }
 
+        /* 5. QR CODE AREA (SQUARE FIX) */
         #qr-phase { display: none; }
         
-        /* --- QR CODE SQUARE FIX --- */
         #qrcode-container { 
             background: white; 
             padding: 20px; 
-            /* FORCING SQUARE DIMENSIONS */
             width: 400px;
             height: 400px;
-            display: flex; /* Centers content inside perfectly */
+            display: flex;
             justify-content: center;
             align-items: center;
-            
             margin: 0 auto 40px auto; 
             border: 4px solid #00ff88; 
             box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
@@ -152,6 +150,7 @@
         }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
+        /* 6. UTILITIES & OVERLAYS */
         input[type="file"] { display: none; }
         
         /* Fullscreen Button */
@@ -172,9 +171,13 @@
 
         /* Overlays */
         #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        .countdown-text { font-family: 'Orbitron'; font-size: 25em; color: #fff; text-shadow: 0 0 100px #00ff88; }
+        
+        /* FIXED FONT SIZE HERE: Changed from 25em to 22em */
+        .countdown-text { font-family: 'Orbitron'; font-size: 22em; color: #fff; text-shadow: 0 0 100px #00ff88; }
+        
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
+        
         video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
     </style>
 </head>
@@ -201,7 +204,8 @@
     <button id="small-fs-btn" onclick="toggleFS()">⛶</button>
     
     <div id="launch-overlay"><div id="countdown" class="countdown-text"></div></div>
-    <video id="mainVideo" playsinline></video>
+    
+    <video id="mainVideo" playsinline loop></video>
     <img id="mainImage">
 
     <script>
@@ -233,9 +237,8 @@
             osc.start(); osc.stop(audioCtx.currentTime+1.5);
         }
 
-        // MODIFIED FS TOGGLE: Hides button when clicked
         function toggleFS() {
-            // 1. Hide the button itself
+            // 1. Hide the button itself on click
             document.getElementById('small-fs-btn').style.display = 'none';
 
             // 2. Go Fullscreen
@@ -262,13 +265,7 @@
                 mediaType = 'video';
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
-                vid.onended = function() {
-                    vid.style.display = 'none';
-                    const overlay = document.getElementById('launch-overlay');
-                    overlay.classList.remove('launch-flash');
-                    overlay.style.display = 'flex';
-                    setTimeout(() => { overlay.style.display = 'none'; vid.style.display = 'block'; vid.currentTime = 0; vid.play(); }, 500);
-                };
+                // REMOVED THE 'onended' LOGIC SO IT DOESN'T RESET
             } else {
                 mediaType = 'image';
                 document.getElementById('mainImage').src = url;
@@ -281,7 +278,6 @@
             const triggerUrl = `${baseUrl}/remote.html?ch=${channelID}`;
             document.getElementById('qrcode').innerHTML = "";
             
-            // Generating QR Code (Size matches container)
             new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 400, height: 400 });
         }
 
