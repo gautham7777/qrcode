@@ -34,7 +34,7 @@
             width: 100%; height: 100%;
             background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
             linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-            background-size: 80px 80px; /* Bigger grid for TV */
+            background-size: 80px 80px; 
             z-index: -1;
         }
 
@@ -44,11 +44,14 @@
             text-align: center;
             z-index: 10;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 5rem; /* MASSIVE TEXT */
+            font-size: 5rem; 
             letter-spacing: 15px;
             text-transform: uppercase;
             margin-bottom: 60px;
@@ -59,12 +62,12 @@
         }
 
         /* --- THE QR HUD --- */
-        #qr-phase { display: none; }
+        #qr-phase { display: none; width: 100%; align-items: center; flex-direction: column; }
 
         .scanner-frame {
             position: relative;
-            width: 500px;  /* DOUBLED SIZE */
-            height: 500px; /* DOUBLED SIZE */
+            width: 500px;  
+            height: 500px; 
             margin: 0 auto;
             border: 2px solid rgba(0, 243, 255, 0.3);
             background: rgba(0, 10, 20, 0.8);
@@ -72,6 +75,8 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 100px rgba(0, 243, 255, 0.2);
+            /* KEY FIX: Hide anything that tries to escape */
+            overflow: hidden; 
         }
 
         /* Animated Corners */
@@ -84,7 +89,7 @@
         /* The Laser Scanner */
         .laser {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 8px; /* Thicker Laser */
+            top: 0; left: 0; width: 100%; height: 8px; 
             background: #00f3ff;
             box-shadow: 0 0 30px #00f3ff, 0 0 15px #fff;
             animation: scan 3s ease-in-out infinite;
@@ -101,8 +106,8 @@
 
         /* --- QR CODE CONTAINER --- */
         #qrcode {
-            width: 400px;  /* Bigger Container */
-            height: 400px; /* Bigger Container */
+            width: 400px;
+            height: 400px;
             background: white;
             padding: 20px;
             border: 4px solid #00f3ff;
@@ -111,16 +116,20 @@
             align-items: center;
         }
 
-        /* FORCE IMAGE SIZE */
+        /* --- THE REAL FIX IS HERE --- */
+        /* Force the image to fit inside the box, no matter what size it generates */
         #qrcode img, #qrcode canvas {
             display: block !important;
-            width: 100% !important;
-            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: contain !important;
         }
 
         .status-text {
             margin-top: 40px;
-            font-size: 2rem; /* Bigger Status Text */
+            font-size: 2rem; 
             letter-spacing: 8px;
             animation: pulse 1.5s infinite;
             text-transform: uppercase;
@@ -132,9 +141,9 @@
             background: rgba(0, 243, 255, 0.1);
             border: 2px solid #00f3ff;
             color: #00f3ff;
-            padding: 30px 80px; /* Huge Padding */
+            padding: 30px 80px; 
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem; /* Huge Text */
+            font-size: 2rem; 
             letter-spacing: 4px;
             cursor: pointer;
             transition: 0.3s;
@@ -234,7 +243,8 @@
             }
 
             document.getElementById('upload-phase').style.display = 'none';
-            document.getElementById('qr-phase').style.display = 'block';
+            // IMPORTANT: Set display to Flex so alignment works
+            document.getElementById('qr-phase').style.display = 'flex'; 
             
             // Generate QR - BIGGER SIZE (400)
             const link = window.location.href.replace('host.html', '') + 'remote.html?ch=' + channelID;
@@ -242,7 +252,7 @@
             qrContainer.innerHTML = ""; 
             
             setTimeout(() => {
-                // Generated at 400px width/height
+                // We generate it at 400px, but CSS will force it to fit.
                 new QRCode(qrContainer, { text: link, width: 400, height: 400 });
             }, 50);
 
