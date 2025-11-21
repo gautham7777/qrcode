@@ -1,0 +1,248 @@
+/* --- GLOBAL RESET --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0b0d17; /* Deep Space Black */
+    color: white;
+    font-family: 'Courier New', Courier, monospace; /* Tech font */
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- 1. LANDING PAGE STYLES --- */
+#landing-section {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+}
+
+.content {
+    z-index: 10;
+    text-align: center;
+    transition: opacity 1s ease;
+}
+
+h1 {
+    font-size: 2.5rem;
+    text-shadow: 0 0 15px #00d4ff;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+#launch-btn {
+    margin-top: 20px;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    background: rgba(0, 212, 255, 0.1);
+    color: #00d4ff;
+    border: 2px solid #00d4ff;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+#launch-btn:hover {
+    background: #00d4ff;
+    color: #000;
+    box-shadow: 0 0 30px #00d4ff;
+}
+
+/* Spaceship */
+.spaceship-container {
+    position: absolute;
+    bottom: 15%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#spaceship {
+    width: 120px;
+    transition: transform 3s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+.fly-out {
+    transform: translateY(-200vh) scale(0.2); /* Flies up and shrinks */
+}
+
+/* --- 2. QR CODE SECTION (Holographic Look) --- */
+#qr-section {
+    display: none;
+    opacity: 0;
+    height: 100vh;
+    width: 100vw;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle, #1a1f35 0%, #000000 100%);
+    transition: opacity 1s ease;
+}
+
+.qr-card {
+    border: 1px solid rgba(0, 212, 255, 0.5);
+    background: rgba(0, 20, 40, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
+}
+
+.qr-card h2 {
+    color: #00d4ff;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 5px;
+}
+
+.sub-text {
+    color: #8899a6;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.qr-frame {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin: 0 auto 20px auto;
+    border: 2px solid #00d4ff;
+    padding: 10px;
+    box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.2);
+}
+
+.qr-img {
+    width: 100%;
+    height: 100%;
+    opacity: 0.9;
+}
+
+.scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #00d4ff;
+    box-shadow: 0 0 10px #00d4ff;
+    animation: scan 2.5s infinite ease-in-out;
+}
+
+@keyframes scan {
+    0% { top: 5%; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { top: 95%; opacity: 0; }
+}
+
+.status-text {
+    color: #00d4ff;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+}
+
+.blink {
+    animation: blinker 1s linear infinite;
+}
+@keyframes blinker { 50% { opacity: 0; } }
+
+/* --- 3. REMOTE CONTROL STYLES (Mobile) --- */
+.remote-body {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remote-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    text-align: center;
+}
+
+.hud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #00d4ff;
+    padding-bottom: 10px;
+    margin-bottom: 40px;
+    color: #00d4ff;
+}
+
+.controller-pad {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    padding: 30px;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.05);
+    position: relative;
+}
+
+/* Adds a cool glowing grid behind the buttons */
+.controller-pad::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 30px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.d-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    justify-items: center;
+    align-items: center;
+}
+
+.btn {
+    width: 70px;
+    height: 70px;
+    background: rgba(10, 15, 30, 0.9);
+    border: 2px solid #00d4ff;
+    border-radius: 12px;
+    color: #00d4ff;
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+    transition: all 0.1s;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent; /* Removes blue highlight on mobile tap */
+}
+
+.btn:active {
+    background: #00d4ff;
+    color: #000;
+    transform: scale(0.92);
+    box-shadow: 0 0 20px #00d4ff;
+}
+
+.btn.select {
+    border-radius: 50%;
+    font-size: 1rem;
+    font-weight: bold;
+    background: rgba(0, 212, 255, 0.15);
+}
+
+.remote-footer {
+    margin-top: 40px;
+    color: #333;
+    font-size: 0.7rem;
+    letter-spacing: 5px;
+}
