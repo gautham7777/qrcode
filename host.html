@@ -34,7 +34,7 @@
             width: 100%; height: 100%;
             background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
             linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
+            background-size: 80px 80px; /* Bigger grid for TV */
             z-index: -1;
         }
 
@@ -43,15 +43,16 @@
             position: relative;
             text-align: center;
             z-index: 10;
+            width: 100%;
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 3rem;
-            letter-spacing: 8px;
+            font-size: 5rem; /* MASSIVE TEXT */
+            letter-spacing: 15px;
             text-transform: uppercase;
-            margin-bottom: 40px;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+            margin-bottom: 60px;
+            text-shadow: 0 0 40px rgba(0, 243, 255, 0.8);
             background: linear-gradient(to bottom, #fff, #00f3ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -62,34 +63,34 @@
 
         .scanner-frame {
             position: relative;
-            padding: 20px;
-            border: 1px solid rgba(0, 243, 255, 0.2);
+            width: 500px;  /* DOUBLED SIZE */
+            height: 500px; /* DOUBLED SIZE */
+            margin: 0 auto;
+            border: 2px solid rgba(0, 243, 255, 0.3);
             background: rgba(0, 10, 20, 0.8);
-            display: inline-block;
-            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 100px rgba(0, 243, 255, 0.2);
         }
 
         /* Animated Corners */
-        .corner {
-            position: absolute;
-            width: 30px; height: 30px;
-            border: 3px solid #00f3ff;
-            transition: all 0.3s;
-        }
-        .tl { top: -5px; left: -5px; border-right: none; border-bottom: none; }
-        .tr { top: -5px; right: -5px; border-left: none; border-bottom: none; }
-        .bl { bottom: -5px; left: -5px; border-right: none; border-top: none; }
-        .br { bottom: -5px; right: -5px; border-left: none; border-top: none; }
+        .corner { position: absolute; width: 60px; height: 60px; border: 6px solid #00f3ff; transition: all 0.3s; z-index: 2; }
+        .tl { top: -10px; left: -10px; border-right: none; border-bottom: none; }
+        .tr { top: -10px; right: -10px; border-left: none; border-bottom: none; }
+        .bl { bottom: -10px; left: -10px; border-right: none; border-top: none; }
+        .br { bottom: -10px; right: -10px; border-left: none; border-top: none; }
 
         /* The Laser Scanner */
         .laser {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
+            top: 0; left: 0; width: 100%; height: 8px; /* Thicker Laser */
             background: #00f3ff;
-            box-shadow: 0 0 20px #00f3ff, 0 0 10px #fff;
-            animation: scan 2.5s ease-in-out infinite;
+            box-shadow: 0 0 30px #00f3ff, 0 0 15px #fff;
+            animation: scan 3s ease-in-out infinite;
             opacity: 0.8;
             pointer-events: none;
+            z-index: 5;
         }
         @keyframes scan {
             0% { top: 0%; opacity: 0; }
@@ -98,44 +99,59 @@
             100% { top: 100%; opacity: 0; }
         }
 
-        #qrcode-container {
+        /* --- QR CODE CONTAINER --- */
+        #qrcode {
+            width: 400px;  /* Bigger Container */
+            height: 400px; /* Bigger Container */
             background: white;
-            padding: 10px;
-            border: 2px solid #00f3ff;
+            padding: 20px;
+            border: 4px solid #00f3ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* FORCE IMAGE SIZE */
+        #qrcode img, #qrcode canvas {
+            display: block !important;
+            width: 100% !important;
+            height: 100% !important;
         }
 
         .status-text {
-            margin-top: 25px;
-            font-size: 1.2rem;
-            letter-spacing: 4px;
+            margin-top: 40px;
+            font-size: 2rem; /* Bigger Status Text */
+            letter-spacing: 8px;
             animation: pulse 1.5s infinite;
+            text-transform: uppercase;
         }
         @keyframes pulse { 50% { opacity: 0.3; } }
 
         /* --- BUTTONS --- */
         .btn {
-            background: transparent;
-            border: 1px solid #00f3ff;
+            background: rgba(0, 243, 255, 0.1);
+            border: 2px solid #00f3ff;
             color: #00f3ff;
-            padding: 15px 40px;
+            padding: 30px 80px; /* Huge Padding */
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
+            font-size: 2rem; /* Huge Text */
+            letter-spacing: 4px;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 20px;
+            margin-top: 40px;
+            text-transform: uppercase;
         }
         .btn:hover {
             background: #00f3ff;
             color: black;
-            box-shadow: 0 0 30px #00f3ff;
+            box-shadow: 0 0 60px #00f3ff;
         }
         
         input[type="file"] { display: none; }
 
         /* --- HIDDEN MEDIA LAYERS --- */
         #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; }
-        .countdown-text { font-family: 'Orbitron', sans-serif; font-size: 15rem; color: white; text-shadow: 0 0 100px #00f3ff; }
+        .countdown-text { font-family: 'Orbitron', sans-serif; font-size: 25rem; color: white; text-shadow: 0 0 150px #00f3ff; }
         video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
 
     </style>
@@ -160,13 +176,11 @@
                 <div class="corner bl"></div><div class="corner br"></div>
                 <div class="laser"></div>
                 
-                <div id="qrcode-container">
-                    <div id="qrcode"></div>
-                </div>
+                <div id="qrcode"></div>
             </div>
 
             <div class="status-text">SCAN TO CONNECT REMOTE</div>
-            <button class="btn" onclick="armSystem()" style="font-size: 0.8rem; margin-top: 30px; opacity: 0.7;">HIDE UI</button>
+            <button class="btn" onclick="armSystem()" style="font-size: 1.2rem; margin-top: 50px; opacity: 0.5;">HIDE UI</button>
         </div>
     </div>
 
@@ -222,10 +236,15 @@
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'block';
             
-            // Generate QR
+            // Generate QR - BIGGER SIZE (400)
             const link = window.location.href.replace('host.html', '') + 'remote.html?ch=' + channelID;
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: link, width: 200, height: 200 });
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = ""; 
+            
+            setTimeout(() => {
+                // Generated at 400px width/height
+                new QRCode(qrContainer, { text: link, width: 400, height: 400 });
+            }, 50);
 
             // Listen for GO
             pubnub.subscribe({ channels: [channelID] });
