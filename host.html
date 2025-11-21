@@ -9,38 +9,130 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-        body { background-color: #050510; color: #00ff88; font-family: 'Share Tech Mono', monospace; height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .stars { width: 1px; height: 1px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; animation: animStar 100s linear infinite; position: absolute; top: 0; left: 0; z-index: -2; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+        
+        body { 
+            background-color: #000005; 
+            color: #00ff88; 
+            font-family: 'Share Tech Mono', monospace; 
+            height: 100vh; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
+            /* Deep Space Gradient */
+            background: radial-gradient(circle at center, #0b1021 0%, #000000 100%);
+        }
+
+        /* SCANLINE OVERLAY */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* STARS ANIMATION */
+        .stars { width: 2px; height: 2px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; animation: animStar 150s linear infinite; position: absolute; top: 0; left: 0; z-index: -1; opacity: 0.8; }
+        .stars2 { width: 3px; height: 3px; background: transparent; box-shadow: 100px 200px #aaf, 400px 500px #aaf, 300px 100px #aaf; animation: animStar 200s linear infinite; position: absolute; top: 0; left: 0; z-index: -1; opacity: 0.5; }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-        #interface { background: rgba(0, 20, 10, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0, 255, 136, 0.3); padding: 60px; border-radius: 12px; text-align: center; z-index: 10; transition: opacity 0.5s; }
-        h1 { margin: 0 0 40px 0; font-size: 24px; letter-spacing: 4px; text-transform: uppercase; color: white; border-bottom: 1px solid rgba(0,255,136,0.2); padding-bottom: 20px; }
-        .btn { padding: 20px 40px; font-family: 'Share Tech Mono', monospace; font-size: 20px; color: #00ff88; background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; cursor: pointer; text-transform: uppercase; width: 100%; }
-        .btn:hover { background: #00ff88; color: black; box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
+
+        /* MAIN INTERFACE CARD */
+        #interface { 
+            background: rgba(5, 10, 20, 0.7); 
+            backdrop-filter: blur(15px); 
+            border: 1px solid #00ff88; 
+            padding: 60px; 
+            border-radius: 4px; 
+            text-align: center; 
+            z-index: 10; 
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.1);
+            position: relative;
+            width: 400px;
+        }
+
+        /* Tech Corners */
+        #interface::before { content: ''; position: absolute; top: -2px; left: -2px; width: 30px; height: 30px; border-top: 4px solid #00ff88; border-left: 4px solid #00ff88; }
+        #interface::after { content: ''; position: absolute; bottom: -2px; right: -2px; width: 30px; height: 30px; border-bottom: 4px solid #00ff88; border-right: 4px solid #00ff88; }
+
+        h1 { 
+            margin: 0 0 40px 0; 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px; 
+            letter-spacing: 6px; 
+            text-transform: uppercase; 
+            color: #fff; 
+            text-shadow: 0 0 20px #00ff88;
+            border-bottom: 1px solid rgba(0,255,136,0.3); 
+            padding-bottom: 20px; 
+        }
+
+        .btn { 
+            padding: 20px 40px; 
+            font-family: 'Share Tech Mono', monospace; 
+            font-size: 20px; 
+            color: #00ff88; 
+            background: rgba(0, 20, 10, 0.6); 
+            border: 1px solid #00ff88; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            width: 100%; 
+            transition: all 0.3s;
+            letter-spacing: 3px;
+        }
+        .btn:hover { 
+            background: #00ff88; 
+            color: black; 
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.8); 
+        }
+
         #qr-phase { display: none; }
-        #qrcode-container { background: white; padding: 20px; display: inline-block; border-radius: 10px; margin-bottom: 20px; }
+        #qrcode-container { 
+            background: rgba(255, 255, 255, 0.9); 
+            padding: 15px; 
+            display: inline-block; 
+            border-radius: 0px; /* Sharp edges */
+            margin-bottom: 20px; 
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        
         input[type="file"] { display: none; }
-        #small-fs-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; color: #00ff88; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; }
+        
+        /* Fullscreen Button */
+        #small-fs-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: transparent; border: 1px solid #00ff88; color: #00ff88; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; opacity: 0.5; }
+        #small-fs-btn:hover { opacity: 1; background: #00ff88; color: black; }
+
+        /* Launch Sequence Styles */
         #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        .countdown-text { font-size: 10em; color: #00ff88; text-shadow: 0 0 50px #00ff88; }
+        .countdown-text { font-family: 'Orbitron', sans-serif; font-size: 15em; color: #fff; text-shadow: 0 0 80px #00ff88; font-weight: bold; }
+        
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
+        
         video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
     </style>
 </head>
 <body>
     <div class="stars"></div>
+    <div class="stars2"></div>
+    
     <div id="interface">
         <div id="upload-phase">
-            <h1>/// Data Uplink ///</h1>
-            <button class="btn" onclick="document.getElementById('fileInput').click()">[ UPLOAD PAYLOAD ]</button>
+            <h1>System Uplink</h1>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">[ INITIALIZE PAYLOAD ]</button>
             <input type="file" id="fileInput" accept="video/*,image/*" onchange="handleFile(this)">
         </div>
         <div id="qr-phase">
-            <h1>/// Secure Link ///</h1>
+            <h1>Secure Link</h1>
             <div id="qrcode-container"><div id="qrcode"></div></div>
-            <p id="status-text" style="color:#aaa; margin-bottom:20px;">WAITING FOR SIGNAL...</p>
-            <button id="arm-btn" class="btn" onclick="armSystem()">Initialize Display</button>
+            <p id="status-text" style="color:#00ff88; margin-bottom:20px; letter-spacing: 2px; font-size: 0.9em;">WAITING FOR REMOTE...</p>
+            <button id="arm-btn" class="btn" onclick="armSystem()">ARM SYSTEM</button>
         </div>
     </div>
     
@@ -50,21 +142,19 @@
     <img id="mainImage">
 
     <script>
-        // --- YOUR KEYS ARE SET HERE ---
+        // --- EXACT LOGIC FROM YOUR WORKING VERSION ---
         const pubnub = new PubNub({
             publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
             subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
             userId: "host_laptop"
         });
-        // ------------------------------
 
-        // Random Channel ID so you don't clash with others
         const channelID = "ceremony_" + Math.floor(Math.random() * 99999);
         let mediaType = "";
         let audioCtx; 
 
-        // --- AUDIO & FULLSCREEN ---
         function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        
         function playBeep() {
             if (!audioCtx) initAudio();
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
@@ -73,6 +163,7 @@
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3);
             osc.start(); osc.stop(audioCtx.currentTime+0.3);
         }
+        
         function playLaunchSound() {
             if (!audioCtx) initAudio();
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
@@ -81,15 +172,14 @@
             gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+1.5);
             osc.start(); osc.stop(audioCtx.currentTime+1.5);
         }
+        
         function toggleFullscreen() {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err=>{});
             else if (document.exitFullscreen) document.exitFullscreen();
         }
 
-        // --- LISTEN FOR SIGNAL ---
         pubnub.subscribe({ channels: [channelID] });
         
-        // IMPORTANT: This listener waits for the 'GO' signal
         pubnub.addListener({
             message: function(m) {
                 if (m.message === 'GO') startLaunchSequence();
@@ -106,7 +196,6 @@
                 mediaType = 'video';
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
-                // Infinite Loop Logic
                 vid.onended = function() {
                     vid.style.display = 'none';
                     const overlay = document.getElementById('launch-overlay');
@@ -122,7 +211,6 @@
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'block';
             
-            // Create QR Code with Channel ID
             const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
             const triggerUrl = `${baseUrl}/remote.html?ch=${channelID}`;
             document.getElementById('qrcode').innerHTML = "";
