@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Mission Control Host</title>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.4.2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Rajdhani:wght@500;700&display=swap');
@@ -75,6 +74,7 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 100px rgba(0, 243, 255, 0.2);
+            overflow: hidden; /* Keeps image inside */
         }
 
         /* Animated Corners */
@@ -102,8 +102,8 @@
             100% { top: 100%; opacity: 0; }
         }
 
-        /* --- QR CODE CONTAINER --- */
-        #qrcode {
+        /* --- QR IMAGE CONTAINER --- */
+        #qr-image-container {
             width: 400px;
             height: 400px;
             background: white;
@@ -113,9 +113,14 @@
             justify-content: center;
             align-items: center;
         }
-        
-        /* Simple safety rule */
-        body > img:not(#mainImage) { display: none !important; }
+
+        /* The Actual QR Image - Locked Dimensions */
+        #qr-img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
         .status-text {
             margin-top: 40px;
@@ -199,7 +204,10 @@
                 <div class="corner tl"></div><div class="corner tr"></div>
                 <div class="corner bl"></div><div class="corner br"></div>
                 <div class="laser"></div>
-                <div id="qrcode"></div>
+                
+                <div id="qr-image-container">
+                    <img id="qr-img" src="" alt="Generating...">
+                </div>
             </div>
             <div class="status-text">IGNITE THE HORIZON</div>
         </div>
@@ -266,33 +274,15 @@
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'flex'; 
             
-            // 2. GENERATE AND CLEAN
+            // 2. GENERATE QR CODE (Using standard API, no library bugs)
             const link = window.location.href.replace('host.html', '') + 'remote.html?ch=' + channelID;
-            const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = ""; 
             
-            new QRCode(qrContainer, { text: link, width: 400, height: 400 });
+            // We use a reliable external API to generate the image
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=000000&bgcolor=ffffff&data=${encodeURIComponent(link)}`;
+            
+            document.getElementById('qr-img').src = qrApiUrl;
 
-            // --- THE BRUTE FORCE CLEANUP SCRIPT ---
-            setTimeout(() => {
-                // Loop through ALL images on the page
-                const allImages = document.getElementsByTagName('img');
-                const qrBox = document.getElementById('qrcode');
-                const mainImg = document.getElementById('mainImage');
-
-                // Loop backwards to remove safely
-                for (let i = allImages.length - 1; i >= 0; i--) {
-                    const img = allImages[i];
-                    
-                    // If it's not the payload image, and it's NOT inside the QR box...
-                    if (img !== mainImg && !qrBox.contains(img)) {
-                        // DELETE IT
-                        img.parentNode.removeChild(img);
-                    }
-                }
-            }, 100); // Run 100ms after generation
-            // ---------------------------------------
-
+            // Listen for GO
             pubnub.subscribe({ channels: [channelID] });
             pubnub.addListener({ message: (m) => { if(m.message === 'GO') launch(); } });
         }
