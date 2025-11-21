@@ -75,7 +75,6 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 100px rgba(0, 243, 255, 0.2);
-            /* KEY FIX: Hide anything that tries to escape */
             overflow: hidden; 
         }
 
@@ -116,8 +115,7 @@
             align-items: center;
         }
 
-        /* --- THE REAL FIX IS HERE --- */
-        /* Force the image to fit inside the box, no matter what size it generates */
+        /* Force the image to fit inside the box */
         #qrcode img, #qrcode canvas {
             display: block !important;
             max-width: 100% !important;
@@ -127,16 +125,51 @@
             object-fit: contain !important;
         }
 
+        /* --- GHOST IMAGE FIX --- */
+        body > img:not(#mainImage), body > canvas {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         .status-text {
             margin-top: 40px;
-            font-size: 2rem; 
-            letter-spacing: 8px;
-            animation: pulse 1.5s infinite;
+            font-size: 2.5rem; 
+            letter-spacing: 10px;
+            animation: pulse 2s infinite;
             text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
         }
-        @keyframes pulse { 50% { opacity: 0.3; } }
+        @keyframes pulse { 50% { opacity: 0.4; } }
 
-        /* --- BUTTONS --- */
+        /* --- FULLSCREEN BUTTON (Bottom Right) --- */
+        #fs-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: transparent;
+            border: 1px solid #00f3ff;
+            color: #00f3ff;
+            font-size: 24px;
+            cursor: pointer;
+            border-radius: 50%;
+            opacity: 0.3;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        #fs-toggle:hover {
+            opacity: 1;
+            background: rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 20px #00f3ff;
+        }
+
+        /* --- UPLOAD BUTTON --- */
         .btn {
             background: rgba(0, 243, 255, 0.1);
             border: 2px solid #00f3ff;
@@ -170,6 +203,8 @@
     <div class="nebula"></div>
     <div class="grid"></div>
 
+    <button id="fs-toggle" onclick="toggleFS()">⛶</button>
+
     <div id="interface">
         <div id="upload-phase">
             <h1>System Uplink</h1>
@@ -188,8 +223,7 @@
                 <div id="qrcode"></div>
             </div>
 
-            <div class="status-text">SCAN TO CONNECT REMOTE</div>
-            <button class="btn" onclick="armSystem()" style="font-size: 1.2rem; margin-top: 50px; opacity: 0.5;">HIDE UI</button>
+            <div class="status-text">IGNITE THE HORIZON</div>
         </div>
     </div>
 
@@ -223,6 +257,18 @@
             osc.start(); osc.stop(audioCtx.currentTime + dur);
         }
 
+        function toggleFS() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
         function handleFile(input) {
             const file = input.files[0];
             if(!file) return;
@@ -243,7 +289,6 @@
             }
 
             document.getElementById('upload-phase').style.display = 'none';
-            // IMPORTANT: Set display to Flex so alignment works
             document.getElementById('qr-phase').style.display = 'flex'; 
             
             // Generate QR - BIGGER SIZE (400)
@@ -252,7 +297,6 @@
             qrContainer.innerHTML = ""; 
             
             setTimeout(() => {
-                // We generate it at 400px, but CSS will force it to fit.
                 new QRCode(qrContainer, { text: link, width: 400, height: 400 });
             }, 50);
 
@@ -261,13 +305,12 @@
             pubnub.addListener({ message: (m) => { if(m.message === 'GO') launch(); } });
         }
 
-        function armSystem() {
-            document.getElementById('interface').style.opacity = '0';
-            document.documentElement.requestFullscreen().catch(()=>{});
-        }
-
         function launch() {
+            // Hide UI immediately on launch signal
             document.getElementById('interface').style.display = 'none';
+            // Hide the FS toggle button too
+            document.getElementById('fs-toggle').style.display = 'none';
+            
             const overlay = document.getElementById('launch-overlay');
             const count = document.getElementById('countdown');
             overlay.style.display = 'flex';
