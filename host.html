@@ -9,55 +9,59 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        /* 1. IMPORT SCI-FI FONT */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Share+Tech+Mono&display=swap');
         
+        /* 2. DEEP SPACE BACKGROUND */
         body { 
-            background-color: #050510; 
-            color: #00ff88; 
-            font-family: 'Share Tech Mono', monospace; 
-            height: 100vh; 
+            background-color: #000; 
             margin: 0; 
+            height: 100vh; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             overflow: hidden; 
-            /* Added a subtle grid background for depth */
-            background-image: linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
+            font-family: 'Orbitron', sans-serif; /* New Font */
+            color: #00ff88; 
+            background: radial-gradient(circle at center, #0a1510 0%, #000000 100%);
         }
 
+        /* Star Animation (Kept same) */
         .stars { width: 1px; height: 1px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; animation: animStar 100s linear infinite; position: absolute; top: 0; left: 0; z-index: -2; }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
 
+        /* 3. THE MAIN PANEL (Glassmorphism & Glow) */
         #interface { 
-            background: rgba(0, 20, 10, 0.85); 
-            backdrop-filter: blur(15px); 
-            border: 2px solid #00ff88; /* Thicker border */
-            padding: 80px; /* Increased padding */
-            border-radius: 4px; 
+            background: rgba(0, 20, 10, 0.8); 
+            backdrop-filter: blur(10px); 
+            border: 2px solid #00ff88; 
+            padding: 60px; 
+            border-radius: 0px; /* Sharp corners look more techy */
             text-align: center; 
             z-index: 10; 
             transition: opacity 0.5s; 
-            box-shadow: 0 0 50px rgba(0, 255, 136, 0.15); /* Added Glow */
-            min-width: 600px; /* Forced Width */
+            width: 100%; 
+            max-width: 700px; /* Made wider for TV */
+            box-shadow: 0 0 60px rgba(0, 255, 136, 0.15); /* Glowing aura */
         }
 
+        /* Typography Upgrades */
         h1 { 
             margin: 0 0 50px 0; 
-            font-size: 3rem; /* Bigger Text */
-            letter-spacing: 6px; 
+            font-size: 3rem; /* Bigger */
+            letter-spacing: 8px; 
             text-transform: uppercase; 
-            color: #00ff88; 
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5); /* Text Glow */
-            border-bottom: 1px solid rgba(0,255,136,0.3); 
+            color: #fff; 
+            text-shadow: 0 0 20px #00ff88; /* Neon Text */
+            border-bottom: 1px solid rgba(0, 255, 136, 0.3); 
             padding-bottom: 30px; 
         }
 
+        /* Button Upgrades */
         .btn { 
-            padding: 25px 60px; /* Bigger Button */
-            font-family: 'Share Tech Mono', monospace; 
-            font-size: 1.5rem; /* Bigger Text */
+            padding: 30px 60px; 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 1.5rem; 
             color: #00ff88; 
             background: rgba(0, 255, 136, 0.05); 
             border: 2px solid #00ff88; 
@@ -65,49 +69,58 @@
             text-transform: uppercase; 
             width: 100%; 
             transition: 0.2s;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
         }
 
         .btn:hover { 
             background: #00ff88; 
             color: black; 
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.8); 
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.8); 
         }
 
         #qr-phase { display: none; }
         
+        /* 4. QR CODE CONTAINER (Centered & Glowing) */
         #qrcode-container { 
             background: white; 
-            padding: 20px; 
-            display: inline-block; 
-            border: 4px solid #00ff88; /* Green border around QR */
-            margin-bottom: 30px; 
+            padding: 25px; 
+            display: block; 
+            width: fit-content; 
+            margin: 0 auto 40px auto; 
+            border: 0px; 
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.4); /* Glow around the QR */
         }
 
-        input[type="file"] { display: none; }
+        #status-text {
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 50% { opacity: 0.6; } }
 
+        /* Hidden Elements */
+        input[type="file"] { display: none; }
+        
+        /* Fullscreen Button (Made subtle) */
         #small-fs-btn { 
             position: fixed; bottom: 30px; right: 30px; 
             width: 60px; height: 60px; 
-            background: rgba(0, 255, 136, 0.1); 
+            background: transparent; 
             border: 1px solid #00ff88; 
             color: #00ff88; 
             font-size: 24px; 
             display: flex; justify-content: center; align-items: center; 
             cursor: pointer; z-index: 100; 
-            border-radius: 5px;
+            opacity: 0.3;
+            transition: 0.3s;
         }
+        #small-fs-btn:hover { opacity: 1; background: rgba(0, 255, 136, 0.1); box-shadow: 0 0 20px #00ff88; }
 
-        #status-text {
-            font-size: 1.5rem; /* Bigger Status Text */
-            letter-spacing: 3px;
-            color: #00ff88;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 50% { opacity: 0.5; } }
-
+        /* Overlays */
         #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        .countdown-text { font-size: 15em; color: #00ff88; text-shadow: 0 0 80px #00ff88; }
+        .countdown-text { font-family: 'Orbitron'; font-size: 20em; color: #fff; text-shadow: 0 0 100px #00ff88; }
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
         video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
@@ -117,15 +130,15 @@
     <div class="stars"></div>
     <div id="interface">
         <div id="upload-phase">
-            <h1>/// Data Uplink ///</h1>
-            <button class="btn" onclick="document.getElementById('fileInput').click()">[ UPLOAD PAYLOAD ]</button>
+            <h1>/// SYSTEM UPLINK ///</h1>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">[ INITIATE PAYLOAD ]</button>
             <input type="file" id="fileInput" accept="video/*,image/*" onchange="handleFile(this)">
         </div>
         <div id="qr-phase">
-            <h1>/// Secure Link ///</h1>
+            <h1>/// AWAITING SIGNAL ///</h1>
             <div id="qrcode-container"><div id="qrcode"></div></div>
-            <p id="status-text">WAITING FOR SIGNAL...</p>
-            </div>
+            <p id="status-text">IGNITE THE HORIZON</p>
+        </div>
     </div>
     
     <button id="small-fs-btn" onclick="toggleFullscreen()">⛶</button>
@@ -134,11 +147,13 @@
     <img id="mainImage">
 
     <script>
+        // --- YOUR KEYS ARE SET HERE ---
         const pubnub = new PubNub({
             publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
             subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
             userId: "host_laptop"
         });
+        // ------------------------------
 
         const channelID = "ceremony_" + Math.floor(Math.random() * 99999);
         let mediaType = "";
@@ -178,6 +193,10 @@
             initAudio();
             const file = input.files[0];
             if (!file) return;
+            
+            // HIDE FULLSCREEN BUTTON ON UPLOAD
+            document.getElementById('small-fs-btn').style.display = 'none';
+
             const url = URL.createObjectURL(file);
 
             if (file.type.startsWith('video')) {
@@ -199,28 +218,17 @@
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'block';
             
-            // --- REQUESTED CHANGE: REMOVE FS BUTTON AFTER UPLOAD ---
-            document.getElementById('small-fs-btn').style.display = 'none';
-            // -------------------------------------------------------
-
             const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
             const triggerUrl = `${baseUrl}/remote.html?ch=${channelID}`;
             document.getElementById('qrcode').innerHTML = "";
-            // Increased QR size to 300 for better visibility
+            
+            // SCALED UP QR CODE (300px)
             new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 300, height: 300 });
         }
 
-        function armSystem() {
-            toggleFullscreen();
-            const ui = document.getElementById('interface');
-            ui.style.opacity = '0';
-            setTimeout(() => { ui.style.display = 'none'; }, 500);
-            document.body.style.cursor = 'none';
-        }
-
         function startLaunchSequence() {
-            // Ensure everything is hidden
             document.getElementById('interface').style.display = 'none';
+            // Double ensure button is gone
             document.getElementById('small-fs-btn').style.display = 'none';
             document.body.style.cursor = 'none';
             
