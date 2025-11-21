@@ -2,299 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mission Control Host</title>
-    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.4.2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Control // Select Mode</title>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Rajdhani:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&display=swap');
         
-        /* --- GLOBAL SETUP --- */
         body { 
-            background-color: #000; 
-            margin: 0; 
+            background-color: #00000a; 
+            color: #fff; 
+            font-family: 'Share Tech Mono', monospace; 
             height: 100vh; 
+            margin: 0; 
             display: flex; 
+            flex-direction: column; 
             justify-content: center; 
             align-items: center; 
             overflow: hidden; 
-            font-family: 'Rajdhani', sans-serif;
-            color: #00f3ff;
+            background: radial-gradient(circle at bottom, #050a1f 0%, #000000 100%);
         }
+        
+        /* Blue Starfield */
+        .stars { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(rgba(0, 210, 255, 0.8) 2px, transparent 2px); background-size: 60px 60px; opacity: 0.3; z-index: -1; animation: starMove 100s linear infinite; }
+        @keyframes starMove { from { transform: translateY(0); } to { transform: translateY(-100vh); } }
 
-        /* --- BACKGROUND FX --- */
-        .nebula {
-            position: absolute;
-            width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, #001a33 0%, #000000 80%);
-            z-index: -2;
-        }
-        .grid {
-            position: absolute;
-            width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1;
-        }
-
-        /* --- UI CONTAINER --- */
-        #interface {
+        .container { 
+            text-align: center; 
+            background: rgba(0, 30, 60, 0.3); 
+            backdrop-filter: blur(25px); 
+            padding: 80px; /* Bigger padding */
+            border: 2px solid rgba(0, 210, 255, 0.3); 
+            border-radius: 20px; 
+            box-shadow: 0 0 100px rgba(0, 210, 255, 0.2), inset 0 0 50px rgba(0, 210, 255, 0.1); 
+            width: 600px; /* Bigger width for TV */
             position: relative;
-            text-align: center;
-            z-index: 10;
-            /* Ensure interface doesn't get too wide */
-            max-width: 90%;
         }
+        
+        /* Corner Accents */
+        .container::before { content: ""; position: absolute; top: -4px; left: -4px; width: 50px; height: 50px; border-top: 5px solid #00d2ff; border-left: 5px solid #00d2ff; border-radius: 8px 0 0 0; }
+        .container::after { content: ""; position: absolute; bottom: -4px; right: -4px; width: 50px; height: 50px; border-bottom: 5px solid #00d2ff; border-right: 5px solid #00d2ff; border-radius: 0 0 8px 0; }
 
-        h1 {
+        h1 { 
+            margin: 0 0 60px 0; 
             font-family: 'Orbitron', sans-serif;
-            font-size: 3rem;
-            letter-spacing: 8px;
+            font-size: 3rem; /* Massive Text */
+            letter-spacing: 8px; 
+            color: #e0f7ff; 
             text-transform: uppercase;
-            margin-bottom: 40px;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
-            background: linear-gradient(to bottom, #fff, #00f3ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(0, 210, 255, 0.7);
+            border-bottom: 2px solid rgba(0, 210, 255, 0.3);
+            padding-bottom: 30px;
         }
 
-        /* --- THE QR HUD --- */
-        #qr-phase { display: none; }
-
-        .scanner-frame {
+        /* Futuristic Blue Button */
+        .btn { 
+            display: block; 
+            width: 100%; 
+            padding: 35px 0; /* Larger touch target */
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 2rem; 
+            letter-spacing: 6px;
+            color: #00d2ff; 
+            background: linear-gradient(45deg, rgba(0, 30, 60, 0.6), rgba(0, 50, 100, 0.6));
+            border: 3px solid #00d2ff;
+            border-radius: 10px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            transition: all 0.3s ease-in-out; 
+            text-transform: uppercase; 
+            box-sizing: border-box; 
             position: relative;
-            /* Fixed dimensions for the frame container */
-            width: 260px;
-            height: 260px;
-            margin: 0 auto; /* Center horizontally */
-            padding: 20px;
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            background: rgba(0, 10, 20, 0.8);
-            display: flex; /* Use flex to center content */
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
-            box-sizing: border-box; /* Include padding in width/height */
-        }
-
-        /* Animated Corners */
-        .corner {
-            position: absolute;
-            width: 30px; height: 30px;
-            border: 3px solid #00f3ff;
-            transition: all 0.3s;
-        }
-        .tl { top: -5px; left: -5px; border-right: none; border-bottom: none; }
-        .tr { top: -5px; right: -5px; border-left: none; border-bottom: none; }
-        .bl { bottom: -5px; left: -5px; border-right: none; border-top: none; }
-        .br { bottom: -5px; right: -5px; border-left: none; border-top: none; }
-
-        /* The Laser Scanner */
-        .laser {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
-            background: #00f3ff;
-            box-shadow: 0 0 20px #00f3ff, 0 0 10px #fff;
-            animation: scan 2.5s ease-in-out infinite;
-            opacity: 0.8;
-            pointer-events: none;
-            z-index: 5;
-        }
-        @keyframes scan {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        /* THE FIX: Strict sizing for the QR container and image */
-        #qrcode-container {
-            background: white;
-            padding: 10px;
-            border: 2px solid #00f3ff;
-            /* Ensure it doesn't overflow the frame */
-            max-width: 100%;
-            max-height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
         }
         
-        /* Force generated QR image to fit */
-        #qrcode img {
-            width: 200px !important; /* Force width */
-            height: 200px !important; /* Force height */
-            display: block;
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.4), transparent);
+            transition: 0.5s;
         }
 
-        .status-text {
-            margin-top: 25px;
-            font-size: 1.2rem;
-            letter-spacing: 4px;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse { 50% { opacity: 0.3; } }
-
-        /* --- BUTTONS --- */
-        .btn {
-            background: transparent;
-            border: 1px solid #00f3ff;
-            color: #00f3ff;
-            padding: 15px 40px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 20px;
-        }
-        .btn:hover {
-            background: #00f3ff;
-            color: black;
-            box-shadow: 0 0 30px #00f3ff;
+        .btn:hover { 
+            background: rgba(0, 210, 255, 0.1); 
+            color: #fff; 
+            box-shadow: 0 0 80px rgba(0, 210, 255, 0.6); 
+            text-shadow: 0 0 20px #00d2ff;
         }
         
-        input[type="file"] { display: none; }
-
-        /* --- HIDDEN MEDIA LAYERS --- */
-        #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; }
-        .countdown-text { font-family: 'Orbitron', sans-serif; font-size: 15rem; color: white; text-shadow: 0 0 100px #00f3ff; }
-        video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
-
+        .btn:hover::before {
+            left: 100%;
+        }
     </style>
 </head>
 <body>
-
-    <div class="nebula"></div>
-    <div class="grid"></div>
-
-    <div id="interface">
-        <div id="upload-phase">
-            <h1>System Uplink</h1>
-            <button class="btn" onclick="document.getElementById('fileInput').click()">[ LOAD PAYLOAD ]</button>
-            <input type="file" id="fileInput" accept="video/*,image/*" onchange="handleFile(this)">
-        </div>
-
-        <div id="qr-phase">
-            <h1>Awaiting Signal</h1>
-            
-            <div class="scanner-frame">
-                <div class="corner tl"></div><div class="corner tr"></div>
-                <div class="corner bl"></div><div class="corner br"></div>
-                <div class="laser"></div>
-                
-                <div id="qrcode-container">
-                    <div id="qrcode"></div>
-                </div>
-            </div>
-
-            <div class="status-text">SCAN TO CONNECT REMOTE</div>
-            <button class="btn" onclick="armSystem()" style="font-size: 0.8rem; margin-top: 30px; opacity: 0.7;">HIDE UI</button>
-        </div>
+    <div class="stars"></div>
+    <div class="container">
+        <h1>INITIATE SEQUENCE</h1>
+        <a href="host.html" class="btn">HOST SCREEN</a>
     </div>
-
-    <div id="launch-overlay"><div id="countdown" class="countdown-text"></div></div>
-    <video id="mainVideo" playsinline></video>
-    <img id="mainImage">
-
-    <script>
-        // --- LOGIC ---
-        const pubnub = new PubNub({
-            publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
-            subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
-            userId: "host"
-        });
-        const channelID = "launch_" + Math.floor(Math.random()*9999);
-        let audioCtx;
-
-        function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-        
-        // Sound FX
-        function playTone(freq, type, dur) {
-            if(!audioCtx) initAudio();
-            const osc = audioCtx.createOscillator(); 
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + dur);
-        }
-
-        function handleFile(input) {
-            const file = input.files[0];
-            if(!file) return;
-            const url = URL.createObjectURL(file);
-            
-            if(file.type.startsWith('video')) {
-                const vid = document.getElementById('mainVideo');
-                vid.src = url;
-                vid.onended = () => { 
-                    vid.style.display = 'none'; 
-                    document.getElementById('launch-overlay').style.display='flex'; 
-                    setTimeout(() => { document.getElementById('launch-overlay').style.display='none'; vid.style.display='block'; vid.play(); }, 500); 
-                };
-                window.mediaType = 'video';
-            } else {
-                document.getElementById('mainImage').src = url;
-                window.mediaType = 'image';
-            }
-
-            document.getElementById('upload-phase').style.display = 'none';
-            document.getElementById('qr-phase').style.display = 'block';
-            
-            // Generate QR
-            const link = window.location.href.replace('host.html', '') + 'remote.html?ch=' + channelID;
-            document.getElementById('qrcode').innerHTML = "";
-            // IMPORTANT: Width and Height set here, CSS forces it to stay put.
-            new QRCode(document.getElementById("qrcode"), { text: link, width: 200, height: 200 });
-
-            // Listen for GO
-            pubnub.subscribe({ channels: [channelID] });
-            pubnub.addListener({ message: (m) => { if(m.message === 'GO') launch(); } });
-        }
-
-        function armSystem() {
-            document.getElementById('interface').style.opacity = '0';
-            document.documentElement.requestFullscreen().catch(()=>{});
-        }
-
-        function launch() {
-            document.getElementById('interface').style.display = 'none';
-            const overlay = document.getElementById('launch-overlay');
-            const count = document.getElementById('countdown');
-            overlay.style.display = 'flex';
-            
-            let num = 3;
-            count.innerText = num;
-            playTone(600, 'sine', 0.5);
-
-            let timer = setInterval(() => {
-                num--;
-                if(num > 0) {
-                    count.innerText = num;
-                    playTone(600, 'sine', 0.5);
-                } else {
-                    clearInterval(timer);
-                    count.innerText = "";
-                    playTone(100, 'sawtooth', 2.0); // Boom
-                    overlay.style.background = 'white'; // Flash
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                        overlay.style.background = 'black';
-                        if(window.mediaType === 'video') {
-                            const v = document.getElementById('mainVideo');
-                            v.style.display='block'; v.currentTime=0; v.play();
-                        } else {
-                            document.getElementById('mainImage').style.display='block';
-                        }
-                    }, 100);
-                }
-            }, 1000);
-        }
-    </script>
 </body>
 </html>
