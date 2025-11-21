@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Mission Control Host</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.4.2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
@@ -11,24 +13,18 @@
         body { background-color: #050510; color: #00ff88; font-family: 'Share Tech Mono', monospace; height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .stars { width: 1px; height: 1px; background: transparent; box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; animation: animStar 100s linear infinite; position: absolute; top: 0; left: 0; z-index: -2; }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-        
         #interface { background: rgba(0, 20, 10, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0, 255, 136, 0.3); padding: 60px; border-radius: 12px; text-align: center; z-index: 10; transition: opacity 0.5s; }
         h1 { margin: 0 0 40px 0; font-size: 24px; letter-spacing: 4px; text-transform: uppercase; color: white; border-bottom: 1px solid rgba(0,255,136,0.2); padding-bottom: 20px; }
         .btn { padding: 20px 40px; font-family: 'Share Tech Mono', monospace; font-size: 20px; color: #00ff88; background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; cursor: pointer; text-transform: uppercase; width: 100%; }
         .btn:hover { background: #00ff88; color: black; box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
-        
         #qr-phase { display: none; }
         #qrcode-container { background: white; padding: 20px; display: inline-block; border-radius: 10px; margin-bottom: 20px; }
         input[type="file"] { display: none; }
-        
         #small-fs-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; color: #00ff88; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; }
-        
-        /* Animation Overlay */
         #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
         .countdown-text { font-size: 10em; color: #00ff88; text-shadow: 0 0 50px #00ff88; }
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
-        
         video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
     </style>
 </head>
@@ -43,7 +39,7 @@
         <div id="qr-phase">
             <h1>/// Secure Link ///</h1>
             <div id="qrcode-container"><div id="qrcode"></div></div>
-            <p id="status-text" style="color:#aaa; margin-bottom:20px;">WAITING FOR REMOTE...</p>
+            <p id="status-text" style="color:#aaa; margin-bottom:20px;">WAITING FOR SIGNAL...</p>
             <button id="arm-btn" class="btn" onclick="armSystem()">Initialize Display</button>
         </div>
     </div>
@@ -53,55 +49,55 @@
     <video id="mainVideo" playsinline></video>
     <img id="mainImage">
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <script>
+        // --- YOUR KEYS ARE SET HERE ---
+        const pubnub = new PubNub({
+            publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
+            subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
+            userId: "host_laptop"
+        });
+        // ------------------------------
 
-        // --- CORRECTED CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAbcNbPBSnxztpnqG1jCcynCShjxukqjhs",
-            authDomain: "billy-app-efa3f.firebaseapp.com",
-            databaseURL: "https://billy-app-efa3f-default-rtdb.firebaseio.com",
-            projectId: "billy-app-efa3f",
-            storageBucket: "billy-app-efa3f.firebasestorage.app",
-            messagingSenderId: "311034808403",
-            appId: "1:311034808403:web:cfe79efa9faa68889ddea6",
-            measurementId: "G-XQ3RKKDTHN"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        
-        const sessionId = Math.floor(1000 + Math.random() * 9000);
+        // Random Channel ID so you don't clash with others
+        const channelID = "ceremony_" + Math.floor(Math.random() * 99999);
         let mediaType = "";
         let audioCtx; 
 
-        // --- AUDIO FUNCTIONS ---
-        window.initAudio = () => { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); };
-        window.playBeep = () => {
-            if (!audioCtx) window.initAudio();
+        // --- AUDIO & FULLSCREEN ---
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        function playBeep() {
+            if (!audioCtx) initAudio();
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.frequency.setValueAtTime(880, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime+0.1);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3);
             osc.start(); osc.stop(audioCtx.currentTime+0.3);
-        };
-        window.playLaunchSound = () => {
-            if (!audioCtx) window.initAudio();
+        }
+        function playLaunchSound() {
+            if (!audioCtx) initAudio();
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime+1);
             gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+1.5);
             osc.start(); osc.stop(audioCtx.currentTime+1.5);
-        };
-        window.toggleFullscreen = () => {
+        }
+        function toggleFullscreen() {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err=>{});
             else if (document.exitFullscreen) document.exitFullscreen();
         }
 
-        // --- MAIN LOGIC ---
-        window.handleFile = (input) => {
-            window.initAudio();
+        // --- LISTEN FOR SIGNAL ---
+        pubnub.subscribe({ channels: [channelID] });
+        
+        // IMPORTANT: This listener waits for the 'GO' signal
+        pubnub.addListener({
+            message: function(m) {
+                if (m.message === 'GO') startLaunchSequence();
+            }
+        });
+
+        function handleFile(input) {
+            initAudio();
             const file = input.files[0];
             if (!file) return;
             const url = URL.createObjectURL(file);
@@ -110,8 +106,8 @@
                 mediaType = 'video';
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
+                // Infinite Loop Logic
                 vid.onended = function() {
-                    // Loop Logic
                     vid.style.display = 'none';
                     const overlay = document.getElementById('launch-overlay');
                     overlay.classList.remove('launch-flash');
@@ -123,36 +119,18 @@
                 document.getElementById('mainImage').src = url;
             }
 
-            // Create Session
-            set(ref(db, 'sessions/' + sessionId), 'WAITING');
-
-            // UI Transition
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'block';
             
-            // Generate QR
+            // Create QR Code with Channel ID
             const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            const triggerUrl = `${baseUrl}/remote.html?id=${sessionId}`;
+            const triggerUrl = `${baseUrl}/remote.html?ch=${channelID}`;
             document.getElementById('qrcode').innerHTML = "";
             new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 200, height: 200 });
-
-            // Listen for Trigger
-            onValue(ref(db, 'sessions/' + sessionId), (snapshot) => {
-                const status = snapshot.val();
-                if (status === 'CONNECTED') {
-                    const st = document.getElementById('status-text');
-                    st.innerText = ">>> LINK ESTABLISHED <<<";
-                    st.style.color = "#00ff88";
-                    document.getElementById('arm-btn').innerText = "[ GO TO LAUNCH MODE ]";
-                }
-                if (status === 'PLAY') {
-                    startLaunchSequence();
-                }
-            });
         }
 
-        window.armSystem = () => {
-            window.toggleFullscreen();
+        function armSystem() {
+            toggleFullscreen();
             const ui = document.getElementById('interface');
             ui.style.opacity = '0';
             document.getElementById('small-fs-btn').style.opacity = '0';
@@ -171,12 +149,12 @@
             
             let count = 3;
             countdown.innerText = count;
-            window.playBeep();
+            playBeep();
 
             const timer = setInterval(() => {
                 count--;
-                if (count > 0) { countdown.innerText = count; window.playBeep(); }
-                else if (count === 0) { countdown.innerText = "LAUNCH"; window.playLaunchSound(); }
+                if (count > 0) { countdown.innerText = count; playBeep(); }
+                else if (count === 0) { countdown.innerText = "LAUNCH"; playLaunchSound(); }
                 else {
                     clearInterval(timer);
                     overlay.classList.add('launch-flash');
