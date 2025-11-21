@@ -9,43 +9,42 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        /* 1. IMPORT SCI-FI FONT */
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Rajdhani:wght@500;700&display=swap');
         
-        /* 2. DEEP SPACE BACKGROUND */
+        /* --- GLOBAL THEME --- */
         body { 
             background-color: #000; 
-            margin: 0; 
+            color: #00ff88; 
+            font-family: 'Rajdhani', sans-serif; 
             height: 100vh; 
+            margin: 0; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             overflow: hidden; 
-            font-family: 'Orbitron', sans-serif;
-            color: #00ff88; 
-            background: radial-gradient(circle at center, #0a1510 0%, #000000 90%);
+            background: radial-gradient(circle at center, #05100a 0%, #000000 90%);
         }
 
-        /* Animated Stars */
+        /* Stars */
         .stars { 
             width: 2px; height: 2px; 
             background: transparent; 
-            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF; 
+            box-shadow: 124px 235px #FFF, 20px 400px #FFF, 500px 120px #FFF, 50px 50px #FFF, 800px 100px #FFF; 
             animation: animStar 150s linear infinite; 
             position: absolute; top: 0; left: 0; z-index: -2; 
         }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
 
-        /* Cyber Grid Overlay */
+        /* Grid */
         .grid {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: linear-gradient(rgba(0, 255, 136, 0.05) 1px, transparent 1px),
             linear-gradient(90deg, rgba(0, 255, 136, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
+            background-size: 60px 60px;
             z-index: -1;
         }
 
-        /* 3. MAIN INTERFACE BOX (HUD STYLE) */
+        /* --- INTERFACE BOX --- */
         #interface { 
             background: rgba(0, 20, 10, 0.85); 
             backdrop-filter: blur(15px); 
@@ -73,6 +72,7 @@
 
         h1 { 
             margin: 0 0 40px 0; 
+            font-family: 'Orbitron', sans-serif;
             font-size: 3rem; 
             letter-spacing: 8px; 
             text-transform: uppercase; 
@@ -82,7 +82,7 @@
             padding-bottom: 30px; 
         }
 
-        /* 4. BUTTONS */
+        /* --- BUTTONS --- */
         .btn { 
             padding: 25px 50px; 
             font-family: 'Orbitron', sans-serif; 
@@ -103,21 +103,26 @@
             box-shadow: 0 0 50px rgba(0, 255, 136, 0.8); 
         }
 
-        /* 5. QR CODE AREA (THE SQUARE FIX) */
         #qr-phase { display: none; }
         
+        /* --- QR CODE SQUARE FIX --- */
         #qrcode-container { 
             background: white; 
             padding: 20px; 
-            /* THIS IS THE KEY FIX FOR THE SQUARE SHAPE: */
-            display: inline-block; 
+            /* FORCING SQUARE DIMENSIONS */
+            width: 400px;
+            height: 400px;
+            display: flex; /* Centers content inside perfectly */
+            justify-content: center;
+            align-items: center;
+            
+            margin: 0 auto 40px auto; 
             border: 4px solid #00ff88; 
             box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
             position: relative;
-            margin-bottom: 30px;
         }
 
-        /* Scanning Line Animation */
+        /* The Scanning Line Animation */
         #qrcode-container::after {
             content: "";
             position: absolute;
@@ -127,12 +132,12 @@
             animation: scan 2.5s ease-in-out infinite;
             opacity: 0.8;
         }
-        @keyframes scan { 
-            0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } 
-        }
+        @keyframes scan { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
 
-        /* Force QR image to fit */
+        /* Force Image to fill the square */
         #qrcode img {
+            width: 100% !important;
+            height: 100% !important;
             display: block;
         }
 
@@ -143,12 +148,13 @@
             color: #00ff88;
             animation: pulse 2s infinite;
             text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
         }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
-        /* 6. UTILITIES & OVERLAYS */
         input[type="file"] { display: none; }
         
+        /* Fullscreen Button */
         #small-fs-btn { 
             position: fixed; bottom: 30px; right: 30px; 
             width: 60px; height: 60px; 
@@ -159,16 +165,16 @@
             display: flex; justify-content: center; align-items: center; 
             cursor: pointer; z-index: 100; 
             border-radius: 50%;
-            opacity: 0.3;
+            opacity: 0.5;
             transition: 0.3s;
         }
         #small-fs-btn:hover { opacity: 1; background: rgba(0, 255, 136, 0.2); box-shadow: 0 0 20px #00ff88; }
 
+        /* Overlays */
         #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
         .countdown-text { font-family: 'Orbitron'; font-size: 25em; color: #fff; text-shadow: 0 0 100px #00ff88; }
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
-        
         video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
     </style>
 </head>
@@ -192,13 +198,13 @@
         </div>
     </div>
     
-    <button id="small-fs-btn" onclick="toggleFullscreen()">⛶</button>
+    <button id="small-fs-btn" onclick="toggleFS()">⛶</button>
+    
     <div id="launch-overlay"><div id="countdown" class="countdown-text"></div></div>
     <video id="mainVideo" playsinline></video>
     <img id="mainImage">
 
     <script>
-        // --- LOGIC FROM YOUR WORKING VERSION ---
         const pubnub = new PubNub({
             publishKey: "pub-c-044354eb-c001-494a-8b27-3391d9a6be07",
             subscribeKey: "sub-c-69d44766-f0b6-487f-8631-db178080b9c5",
@@ -226,7 +232,13 @@
             gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+1.5);
             osc.start(); osc.stop(audioCtx.currentTime+1.5);
         }
-        function toggleFullscreen() {
+
+        // MODIFIED FS TOGGLE: Hides button when clicked
+        function toggleFS() {
+            // 1. Hide the button itself
+            document.getElementById('small-fs-btn').style.display = 'none';
+
+            // 2. Go Fullscreen
             if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err=>{});
             else if (document.exitFullscreen) document.exitFullscreen();
         }
@@ -243,10 +255,8 @@
             initAudio();
             const file = input.files[0];
             if (!file) return;
+            
             const url = URL.createObjectURL(file);
-
-            // HIDE FULLSCREEN BUTTON
-            document.getElementById('small-fs-btn').style.display = 'none';
 
             if (file.type.startsWith('video')) {
                 mediaType = 'video';
@@ -271,8 +281,8 @@
             const triggerUrl = `${baseUrl}/remote.html?ch=${channelID}`;
             document.getElementById('qrcode').innerHTML = "";
             
-            // 300px Square QR
-            new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 300, height: 300 });
+            // Generating QR Code (Size matches container)
+            new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 400, height: 400 });
         }
 
         function startLaunchSequence() {
