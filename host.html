@@ -47,16 +47,18 @@
 
         /* 3. MAIN INTERFACE BOX (HUD STYLE) */
         #interface { 
-            background: rgba(0, 20, 10, 0.85); 
+            background: rgba(0, 20, 10, 0.9); 
             backdrop-filter: blur(15px); 
             border: 1px solid rgba(0, 255, 136, 0.4); 
-            padding: 60px; 
+            padding: 40px 60px; 
             text-align: center; 
             z-index: 10; 
             transition: opacity 0.5s; 
             box-shadow: 0 0 80px rgba(0, 255, 136, 0.1);
             position: relative;
-            min-width: 600px;
+            min-width: 700px;
+            max-height: 90vh; /* Prevent cutting off on small screens */
+            overflow-y: auto; /* Scroll if needed */
         }
 
         /* HUD Corners */
@@ -72,55 +74,92 @@
         }
 
         h1 { 
-            margin: 0 0 40px 0; 
+            margin: 0 0 30px 0; 
+            font-family: 'Orbitron', sans-serif;
             font-size: 3rem; 
             letter-spacing: 8px; 
             text-transform: uppercase; 
             color: #fff; 
             text-shadow: 0 0 20px #00ff88;
             border-bottom: 2px solid rgba(0, 255, 136, 0.2); 
-            padding-bottom: 30px; 
+            padding-bottom: 20px; 
         }
 
-        /* 4. BUTTONS */
+        /* 4. OPTIONS LAYOUT */
+        .option-group {
+            margin-bottom: 40px;
+        }
+        
+        .option-title {
+            font-size: 1.2rem;
+            color: #00ff88;
+            opacity: 0.7;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(0, 255, 136, 0.5), transparent);
+            margin: 30px 0;
+            width: 100%;
+        }
+
+        /* 5. PRESET PREVIEW */
+        .preview-box {
+            width: 300px;
+            height: 170px;
+            border: 2px solid #00ff88;
+            margin: 0 auto 20px auto;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+        
+        .preview-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+        }
+
+        /* 6. BUTTONS */
         .btn { 
-            padding: 25px 50px; 
+            padding: 20px 40px; 
             font-family: 'Orbitron', sans-serif; 
-            font-size: 1.5rem; 
+            font-size: 1.2rem; 
             color: #00ff88; 
             background: rgba(0, 255, 136, 0.05); 
             border: 2px solid #00ff88; 
             cursor: pointer; 
             text-transform: uppercase; 
             width: 100%; 
+            max-width: 400px;
             transition: 0.2s;
-            letter-spacing: 4px;
-            margin-top: 20px;
+            letter-spacing: 3px;
         }
         .btn:hover { 
             background: #00ff88; 
             color: black; 
-            box-shadow: 0 0 50px rgba(0, 255, 136, 0.8); 
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.6); 
         }
 
-        /* 5. QR CODE AREA (SQUARE FIX) */
+        /* 7. QR CODE AREA */
         #qr-phase { display: none; }
         
         #qrcode-container { 
             background: white; 
             padding: 20px; 
-            width: 400px;
-            height: 400px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 40px auto; 
+            display: inline-block; 
             border: 4px solid #00ff88; 
             box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
             position: relative;
+            margin-bottom: 30px;
         }
 
-        /* The Scanning Line Animation */
+        /* Scanning Line Animation */
         #qrcode-container::after {
             content: "";
             position: absolute;
@@ -132,28 +171,21 @@
         }
         @keyframes scan { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
 
-        /* Force Image to fill the square */
-        #qrcode img {
-            width: 100% !important;
-            height: 100% !important;
-            display: block;
-        }
+        /* Force QR image to fit */
+        #qrcode img { display: block; }
 
-        /* Status Text */
         #status-text {
             font-size: 1.5rem;
             letter-spacing: 4px;
             color: #00ff88;
             animation: pulse 2s infinite;
             text-transform: uppercase;
-            font-family: 'Orbitron', sans-serif;
         }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
-        /* 6. UTILITIES & OVERLAYS */
+        /* 8. UTILITIES */
         input[type="file"] { display: none; }
         
-        /* Fullscreen Button */
         #small-fs-btn { 
             position: fixed; bottom: 30px; right: 30px; 
             width: 60px; height: 60px; 
@@ -164,17 +196,13 @@
             display: flex; justify-content: center; align-items: center; 
             cursor: pointer; z-index: 100; 
             border-radius: 50%;
-            opacity: 0.5;
+            opacity: 0.3;
             transition: 0.3s;
         }
         #small-fs-btn:hover { opacity: 1; background: rgba(0, 255, 136, 0.2); box-shadow: 0 0 20px #00ff88; }
 
-        /* Overlays */
         #launch-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 90; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        
-        /* FIXED FONT SIZE HERE: Changed from 25em to 22em */
         .countdown-text { font-family: 'Orbitron'; font-size: 22em; color: #fff; text-shadow: 0 0 100px #00ff88; }
-        
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
         
@@ -188,8 +216,22 @@
     <div id="interface">
         <div id="upload-phase">
             <h1>/// SYSTEM UPLINK ///</h1>
-            <button class="btn" onclick="document.getElementById('fileInput').click()">[ INITIATE PAYLOAD ]</button>
-            <input type="file" id="fileInput" accept="video/*,image/*" onchange="handleFile(this)">
+            
+            <div class="option-group">
+                <div class="option-title">OPTION A: MANUAL OVERRIDE</div>
+                <button class="btn" onclick="document.getElementById('fileInput').click()">[ UPLOAD FILE ]</button>
+                <input type="file" id="fileInput" accept="video/*,image/*" onchange="handleFile(this)">
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="option-group">
+                <div class="option-title">OPTION B: PRESET PROTOCOL</div>
+                <div class="preview-box">
+                    <video src="celstia fiesta.mp4" autoplay muted loop></video>
+                </div>
+                <button class="btn" onclick="selectPreset()">[ ENGAGE PRESET ]</button>
+            </div>
         </div>
         
         <div id="qr-phase">
@@ -202,7 +244,6 @@
     </div>
     
     <button id="small-fs-btn" onclick="toggleFS()">⛶</button>
-    
     <div id="launch-overlay"><div id="countdown" class="countdown-text"></div></div>
     
     <video id="mainVideo" playsinline loop></video>
@@ -238,10 +279,7 @@
         }
 
         function toggleFS() {
-            // 1. Hide the button itself on click
             document.getElementById('small-fs-btn').style.display = 'none';
-
-            // 2. Go Fullscreen
             if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err=>{});
             else if (document.exitFullscreen) document.exitFullscreen();
         }
@@ -254,18 +292,40 @@
             }
         });
 
+        // --- NEW FUNCTION: Select the Preset Video ---
+        function selectPreset() {
+            initAudio();
+            
+            // 1. Set Main Video Source to the repo file
+            const vid = document.getElementById('mainVideo');
+            vid.src = "celstia fiesta.mp4"; // Direct file name
+            mediaType = 'video';
+
+            // 2. Remove FS button
+            document.getElementById('small-fs-btn').style.display = 'none';
+
+            // 3. Switch UI
+            document.getElementById('upload-phase').style.display = 'none';
+            document.getElementById('qr-phase').style.display = 'block';
+
+            // 4. Generate QR
+            generateQR();
+        }
+
         function handleFile(input) {
             initAudio();
             const file = input.files[0];
             if (!file) return;
             
             const url = URL.createObjectURL(file);
+            
+            // Remove FS button
+            document.getElementById('small-fs-btn').style.display = 'none';
 
             if (file.type.startsWith('video')) {
                 mediaType = 'video';
                 const vid = document.getElementById('mainVideo');
                 vid.src = url;
-                // REMOVED THE 'onended' LOGIC SO IT DOESN'T RESET
             } else {
                 mediaType = 'image';
                 document.getElementById('mainImage').src = url;
@@ -274,11 +334,16 @@
             document.getElementById('upload-phase').style.display = 'none';
             document.getElementById('qr-phase').style.display = 'block';
             
+            generateQR();
+        }
+
+        function generateQR() {
             const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
             const triggerUrl = `${baseUrl}/remote.html?ch=${channelID}`;
             document.getElementById('qrcode').innerHTML = "";
             
-            new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 400, height: 400 });
+            // 300px Square QR
+            new QRCode(document.getElementById("qrcode"), { text: triggerUrl, width: 300, height: 300 });
         }
 
         function startLaunchSequence() {
