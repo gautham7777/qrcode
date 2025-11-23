@@ -118,14 +118,15 @@
             box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
         }
         
-        /* FORCE VIDEO VISIBILITY */
+        /* FORCE PREVIEW VIDEO TO STAY INSIDE BOX */
         .preview-box video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 1 !important; /* Force visible */
+            opacity: 1 !important; 
             display: block;
             z-index: 5;
+            position: relative; /* Kept relative so it stays inside div */
         }
 
         /* 6. BUTTONS */
@@ -209,7 +210,15 @@
         .launch-flash { animation: flashAnim 0.5s ease-out forwards; }
         @keyframes flashAnim { 0% { background: black; } 50% { background: white; } 100% { background: black; } }
         
-        video, img { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 100; background: black; }
+        /* THE FIX: ONLY Target Main Media for Fullscreen */
+        #mainVideo, #mainImage { 
+            position: fixed; top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            object-fit: contain; 
+            display: none; 
+            z-index: 100; 
+            background: black; 
+        }
     </style>
 </head>
 <body>
@@ -263,11 +272,11 @@
         let mediaType = "";
         let audioCtx; 
 
-        // --- FORCE VIDEO PREVIEW TO PLAY ON LOAD ---
+        // FORCE VIDEO PREVIEW TO PLAY
         window.addEventListener('load', () => {
             const pVid = document.getElementById('preview-vid');
             if(pVid) {
-                pVid.muted = true; // Required for autoplay
+                pVid.muted = true; 
                 pVid.play().catch(e => console.log("Preview Autoplay prevented: ", e));
             }
         });
